@@ -33,7 +33,7 @@ app.post("/naics", (req, res) => {
     businessActivity: naicsCode.substring(0, 5),
   };
 
-  // Respond with categories
+  // Respond with naicsCategories
   res.json(naicsCategories);
 });
 
