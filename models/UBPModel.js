@@ -5,7 +5,6 @@ const ubpSchema = mongoose.Schema(
     commonBusinessActivity: {
       type: String,
       required: [true, "Please add the UBP Activity"],
-      unique: [true, "UBP already exists!"],
     },
     industry: {
       type: String,

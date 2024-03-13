@@ -14,13 +14,13 @@ const AllUBPActivities = asyncHandler(async (req, res) => {
 // @access public
 
 const createUBP = asyncHandler(async (req, res) => {
-  const { commonBusiness, naicsCode } = req.body;
-  if (!naicsCode || !commonBusiness) {
+  const { commonBusinessActivity, naicsCode } = req.body;
+  if (!naicsCode || !commonBusinessActivity) {
     return res
       .status(400)
       .json({ error: "NAICS code & CommonBusiness Activity are required" });
   }
-  const UBPAvailable = await UBP.findOne({commonBusiness});
+  const UBPAvailable = await UBP.findOne({ commonBusinessActivity });
   if (UBPAvailable) {
     res.status(400);
     throw new Error("UBP Activity already exists!");
@@ -28,7 +28,7 @@ const createUBP = asyncHandler(async (req, res) => {
 
   // Break NAICS code into four categories
   const naicsCategories = {
-    commonBusinessActivity: commonBusiness,
+    commonBusinessActivity: commonBusinessActivity,
     industry: naicsCode.substring(0, 2),
     businessCategory: naicsCode.substring(0, 3),
     businessSubCategory: naicsCode.substring(0, 4),
