@@ -48,14 +48,13 @@ const createUBP = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc Get a UBP Activity by ID
+// @desc Get a UBP Activity by Common Business Activity
 // @route GET /api/naics/:commonBusinessActivity
 // @access public
 const getUBPActivity = asyncHandler(async (req, res) => {
   const { commonBusinessActivity } = req.params;
   const regex = new RegExp(`^${commonBusinessActivity}$`, "i");
   const ubpActivity= await UBP.findOne({ commonBusinessActivity: regex });
-  // const ubpActivity = await UBP.findOne({ commonBusinessActivity });
   if (!ubpActivity) {
     res.status(404).json({ message: "UBP Activity not found" });
   } else {
