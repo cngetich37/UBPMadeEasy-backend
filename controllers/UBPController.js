@@ -4,10 +4,10 @@ const UBP = require("../models/UBPModel");
 // @desc Get All UBP Activities
 // @route GET /api/naics
 // @access public
-const AllUBPActivities = asyncHandler(async (req, res) => {
-  const ubpActivities = await UBP.find();
-  res.status(200).json(ubpActivities);
-});
+// const AllUBPActivities = asyncHandler(async (req, res) => {
+//   const ubpActivities = await UBP.find();
+//   res.status(200).json(ubpActivities);
+// });
 
 // @desc Create UBP
 // @route POST /api/naics
@@ -28,7 +28,7 @@ const createUBP = asyncHandler(async (req, res) => {
     throw new Error("UBP Activity already exists!");
   }
 
-  // Break NAICS code into four categories
+  // Break NAICS code into four categories and attach a Business Activity to it
   const naicsCategories = {
     commonBusinessActivity: commonBusinessActivity,
     industry: naicsCode.substring(0, 2),
@@ -53,17 +53,77 @@ const createUBP = asyncHandler(async (req, res) => {
 // @access public
 const getUBPActivity = asyncHandler(async (req, res) => {
   const { commonBusinessActivity } = req.params;
-  const regex = new RegExp(`^${commonBusinessActivity}$`, "i");
-  const ubpActivity= await UBP.findOne({ commonBusinessActivity: regex });
+
+  // Create regular expressions to match both singular and plural forms
+  const singularRegex = new RegExp(`^${commonBusinessActivity}$`, "i");
+  const pluralRegex = new RegExp(`^${commonBusinessActivity}s?$`, "i");
+
+  // Search for both singular and plural forms
+  const ubpActivity = await UBP.findOne({
+    $or: [
+      { commonBusinessActivity: singularRegex },
+      { commonBusinessActivity: pluralRegex },
+    ],
+  });
+
   if (!ubpActivity) {
-    res.status(404).json({ message: "UBP Activity not found" });
+    res.status(404).json({ message: "Business Activity not found" });
   } else {
     res.status(200).json(ubpActivity);
+  }
+});
+
+// @desc Get the Common Business Activities
+// @route GET /api/naics/ubpdictionary
+// @access public
+const getUbpDictionary = asyncHandler(async (req, res) => {
+  try {
+    // Assuming UBP is a model representing suggestions, modify the query accordingly
+    const ubpDictionary = await UBP.find(
+      {},
+      { commonBusinessActivity: 1, _id: 0 }
+    ); // Adjust "commonBusinessActivity" to your actual field name
+
+    res.status(200).json(ubpDictionary);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+// @desc Get a UBP Activity by Common Business Activity
+// @route GET /api/naics/ubpdictionary/:commonBusinessActivity
+// @access public
+const getSuggestions = asyncHandler(async (req, res) => {
+  const { commonBusinessActivity } = req.params;
+
+  // Create regular expressions to match both singular and plural forms
+  const singularRegex = new RegExp(`^${commonBusinessActivity}$`, "i");
+  const pluralRegex = new RegExp(`^${commonBusinessActivity}s?$`, "i");
+
+  // Search for both singular and plural forms
+  const ubpActivity = await UBP.findOne(
+    {
+      $or: [
+        { commonBusinessActivity: singularRegex },
+        { commonBusinessActivity: pluralRegex },
+      ],
+    },
+    { commonBusinessActivity: 1, _id: 0 }
+  ); // Include only the "commonBusinessActivity" field and exclude "_id"
+
+  if (!ubpActivity) {
+    res.status(404).json({ message: "Business Activity not found" });
+  } else {
+    // Extract only the "commonBusinessActivity" field from the document
+    const { commonBusinessActivity } = ubpActivity;
+    res.status(200).json({ commonBusinessActivity });
   }
 });
 
 module.exports = {
   createUBP,
   getUBPActivity,
-  AllUBPActivities,
+  getUbpDictionary,
+  getSuggestions,
 };
