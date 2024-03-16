@@ -41,7 +41,7 @@ const createUBP = asyncHandler(async (req, res) => {
     await UBP.create(naicsCategories);
     res
       .status(201)
-      .json({ message: "UBP Business Activity added successfully" });
+      .json({ message: "Business Activity added successfully" });
   } catch (error) {
     console.error("Error adding UBP Business Activity:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -91,7 +91,7 @@ const getUbpDictionary = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc Get a UBP Activity by Common Business Activity
+// @desc Get UBP Activities by Common Business Activity
 // @route GET /api/naics/ubpdictionary/:commonBusinessActivity
 // @access public
 const getSuggestions = asyncHandler(async (req, res) => {
@@ -102,7 +102,7 @@ const getSuggestions = asyncHandler(async (req, res) => {
   const pluralRegex = new RegExp(`^${commonBusinessActivity}s?$`, "i");
 
   // Search for both singular and plural forms
-  const ubpActivity = await UBP.findOne(
+  const ubpActivities = await UBP.find(
     {
       $or: [
         { commonBusinessActivity: singularRegex },
@@ -112,12 +112,14 @@ const getSuggestions = asyncHandler(async (req, res) => {
     { commonBusinessActivity: 1, _id: 0 }
   ); // Include only the "commonBusinessActivity" field and exclude "_id"
 
-  if (!ubpActivity) {
+  if (ubpActivities.length === 0) {
     res.status(404).json({ message: "Business Activity not found" });
   } else {
-    // Extract only the "commonBusinessActivity" field from the document
-    const { commonBusinessActivity } = ubpActivity;
-    res.status(200).json({ commonBusinessActivity });
+    // Extract only the "commonBusinessActivity" field from the documents
+    const activities = ubpActivities.map((activity) => ({
+      commonBusinessActivity: activity.commonBusinessActivity,
+    }));
+    res.status(200).json(activities);
   }
 });
 
