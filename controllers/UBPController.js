@@ -12,20 +12,22 @@ const UBP = require("../models/UBPModel");
 // @desc Create UBP
 // @route POST /api/naics
 // @access public
-
 const createUBP = asyncHandler(async (req, res) => {
+  // Extract fields from the request body
   const { commonBusinessActivity, naicsCode } = req.body;
+
+  // Check if required fields are provided
   if (!naicsCode || !commonBusinessActivity) {
     return res
       .status(400)
       .json({ error: "NAICS code & CommonBusiness Activity are required" });
   }
+
+  // Check if UBP Activity already exists
   const regex = new RegExp(`^${commonBusinessActivity}$`, "i");
   const UBPAvailable = await UBP.findOne({ commonBusinessActivity: regex });
-
   if (UBPAvailable) {
-    res.status(400);
-    throw new Error("UBP Activity already exists!");
+    return res.status(400).json({ error: "UBP Activity already exists!" });
   }
 
   // Break NAICS code into four categories and attach a Business Activity to it
@@ -38,6 +40,7 @@ const createUBP = asyncHandler(async (req, res) => {
   };
 
   try {
+    // Create UBP Business Activity
     await UBP.create(naicsCategories);
     res.status(201).json({ message: "Business Activity added successfully" });
   } catch (error) {
@@ -45,7 +48,6 @@ const createUBP = asyncHandler(async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 // @desc Get a UBP Activity by Common Business Activity
 // @route GET /api/naics/:commonBusinessActivity
 // @access public
@@ -119,9 +121,81 @@ const getSuggestions = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc upload UBP
+// @route POST /api/naics/uploadUBP
+// @access public
+const uploadUBP = asyncHandler(async (req, res) => {
+  try {
+    // Extract arrays from the request body
+    const { commonBusinessActivity, naicsCode } = req.body;
+
+    // Check if required fields are provided
+    if (!commonBusinessActivity || !naicsCode) {
+      return res
+        .status(400)
+        .json({
+          error: "Common Business Activity and NAICS Code are required",
+        });
+    }
+
+    // Check if arrays have the same length
+    if (commonBusinessActivity.length !== naicsCode.length) {
+      return res
+        .status(400)
+        .json({
+          error:
+            "Common Business Activity and NAICS Code arrays must have the same length",
+        });
+    }
+
+    // Create UBP entries for each pair of commonBusinessActivity and naicsCode
+    const createdEntries = [];
+    for (let i = 0; i < commonBusinessActivity.length; i++) {
+      const commonBusinessActivityItem = commonBusinessActivity[i];
+      const naicsCodeItem = naicsCode[i];
+
+      // Check if UBP Activity already exists
+      const regex = new RegExp(`^${commonBusinessActivityItem}$`, "i");
+      const UBPAvailable = await UBP.findOne({ commonBusinessActivity: regex });
+      if (UBPAvailable) {
+        return res
+          .status(400)
+          .json({
+            error:
+              "UBP Activity already exists for: " + commonBusinessActivityItem,
+          });
+      }
+
+      // Break NAICS code into four categories and attach a Business Activity to it
+      const naicsCategories = {
+        commonBusinessActivity: commonBusinessActivityItem,
+        industry: naicsCodeItem.substring(0, 2),
+        businessCategory: naicsCodeItem.substring(0, 3),
+        businessSubCategory: naicsCodeItem.substring(0, 4),
+        businessActivity: naicsCodeItem.substring(0, 5),
+      };
+
+      // Create UBP Business Activity
+      const createdEntry = await UBP.create(naicsCategories);
+      createdEntries.push(createdEntry);
+    }
+
+    res
+      .status(201)
+      .json({
+        message: "Business Activities added successfully",
+        createdEntries,
+      });
+  } catch (error) {
+    console.error("Error adding UBP Business Activities:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 module.exports = {
   createUBP,
   getUBPActivity,
   getUbpDictionary,
   getSuggestions,
+  uploadUBP,
 };
