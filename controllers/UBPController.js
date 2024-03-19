@@ -244,7 +244,7 @@ const updateUBP = asyncHandler(async (req, res) => {
     }
 
     res.status(201).json({
-      message: "Business Activities added successfully",
+      message: "Business Activities updated successfully",
       createdEntries,
     });
   } catch (error) {
