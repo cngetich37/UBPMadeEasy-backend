@@ -97,27 +97,32 @@ const getUbpDictionary = asyncHandler(async (req, res) => {
 const getSuggestions = asyncHandler(async (req, res) => {
   const { commonBusinessActivity } = req.params;
 
-  // Create regular expressions to match both singular and plural forms
-  const singularRegex = new RegExp(`^${commonBusinessActivity}$`, "i");
-  const pluralRegex = new RegExp(`^${commonBusinessActivity}s?$`, "i");
+  try {
+    // Create a case-insensitive regex pattern to match partial input
+    const regexPattern = new RegExp(commonBusinessActivity, "i");
 
-  // Search for both singular and plural forms
-  const ubpActivity = await UBP.findOne(
-    {
-      $or: [
-        { commonBusinessActivity: singularRegex },
-        { commonBusinessActivity: pluralRegex },
-      ],
-    },
-    { commonBusinessActivity: 1, _id: 0 }
-  ); // Include only the "commonBusinessActivity" field and exclude "_id"
+    // Search for business activities that contain the partial input value
+    const ubpActivities = await UBP.find(
+      { commonBusinessActivity: { $regex: regexPattern } },
+      { commonBusinessActivity: 1, _id: 0 }
+    );
 
-  if (!ubpActivity) {
-    res.status(404).json({ message: "Business Activity not found" });
-  } else {
-    // Extract only the "commonBusinessActivity" field from the document
-    const { commonBusinessActivity } = ubpActivity;
-    res.status(200).json({ commonBusinessActivity });
+    // Extract only the "commonBusinessActivity" field from the documents
+    const suggestions = ubpActivities.map(
+      (activity) => activity.commonBusinessActivity
+    );
+
+    if (suggestions.length === 0) {
+      // No matching suggestions found
+      res.status(404).json({ message: "No matching suggestions found" });
+    } else {
+      // Return the matching suggestions
+      res.status(200).json({ suggestions });
+    }
+  } catch (error) {
+    // Handle errors
+    console.error("Error fetching suggestions:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
