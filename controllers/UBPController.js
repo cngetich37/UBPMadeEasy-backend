@@ -98,10 +98,10 @@ const getSuggestions = asyncHandler(async (req, res) => {
   const { commonBusinessActivity } = req.params;
 
   try {
-    // Create a case-insensitive regex pattern to match partial input
-    const regexPattern = new RegExp(commonBusinessActivity, "i");
+    // Create a regex pattern to match partial input at the beginning of the string
+    const regexPattern = new RegExp(`^${commonBusinessActivity}`, "i");
 
-    // Search for business activities that contain the partial input value
+    // Search for business activities that start with the partial input value
     const ubpActivities = await UBP.find(
       { commonBusinessActivity: { $regex: regexPattern } },
       { commonBusinessActivity: 1, _id: 0 }
