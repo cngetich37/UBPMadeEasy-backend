@@ -98,19 +98,17 @@ const getSuggestions = asyncHandler(async (req, res) => {
   const { commonBusinessActivity } = req.params;
 
   try {
-    // Create a regex pattern to match partial input at the beginning of the string
-    const regexPattern = new RegExp(`^${commonBusinessActivity}`, "i");
+    // Create a regex pattern to match partial input anywhere within the string
+    const regexPattern = new RegExp(`${commonBusinessActivity}`, 'i');
 
-    // Search for business activities that start with the partial input value
+    // Search for business activities that contain the partial input value
     const ubpActivities = await UBP.find(
       { commonBusinessActivity: { $regex: regexPattern } },
       { commonBusinessActivity: 1, _id: 0 }
     );
 
     // Extract only the "commonBusinessActivity" field from the documents
-    const suggestions = ubpActivities.map(
-      (activity) => activity.commonBusinessActivity
-    );
+    const suggestions = ubpActivities.map(activity => activity.commonBusinessActivity);
 
     if (suggestions.length === 0) {
       // No matching suggestions found
@@ -125,6 +123,7 @@ const getSuggestions = asyncHandler(async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 // @desc upload bulk UBP
 // @route POST /api/naics/uploadUBP
