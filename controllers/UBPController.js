@@ -4,10 +4,10 @@ const UBP = require("../models/UBPModel");
 // @desc Get All UBP Activities
 // @route GET /api/naics
 // @access public
-// const AllUBPActivities = asyncHandler(async (req, res) => {
-//   const ubpActivities = await UBP.find();
-//   res.status(200).json(ubpActivities);
-// });
+const AllUBPActivities = asyncHandler(async (req, res) => {
+  const ubpActivities = await UBP.find();
+  res.status(200).json(ubpActivities);
+});
 
 // @desc Create UBP
 // @route POST /api/naics
@@ -131,21 +131,17 @@ const uploadUBP = asyncHandler(async (req, res) => {
 
     // Check if required fields are provided
     if (!commonBusinessActivity || !naicsCode) {
-      return res
-        .status(400)
-        .json({
-          error: "Common Business Activity and NAICS Code are required",
-        });
+      return res.status(400).json({
+        error: "Common Business Activity and NAICS Code are required",
+      });
     }
 
     // Check if arrays have the same length
     if (commonBusinessActivity.length !== naicsCode.length) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Common Business Activity and NAICS Code arrays must have the same length",
-        });
+      return res.status(400).json({
+        error:
+          "Common Business Activity and NAICS Code arrays must have the same length",
+      });
     }
 
     // Create UBP entries for each pair of commonBusinessActivity and naicsCode
@@ -158,12 +154,10 @@ const uploadUBP = asyncHandler(async (req, res) => {
       const regex = new RegExp(`^${commonBusinessActivityItem}$`, "i");
       const UBPAvailable = await UBP.findOne({ commonBusinessActivity: regex });
       if (UBPAvailable) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "UBP Activity already exists for: " + commonBusinessActivityItem,
-          });
+        return res.status(400).json({
+          error:
+            "UBP Activity already exists for: " + commonBusinessActivityItem,
+        });
       }
 
       // Break NAICS code into four categories and attach a Business Activity to it
@@ -180,12 +174,10 @@ const uploadUBP = asyncHandler(async (req, res) => {
       createdEntries.push(createdEntry);
     }
 
-    res
-      .status(201)
-      .json({
-        message: "Business Activities added successfully",
-        createdEntries,
-      });
+    res.status(201).json({
+      message: "Business Activities added successfully",
+      createdEntries,
+    });
   } catch (error) {
     console.error("Error adding UBP Business Activities:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -253,12 +245,12 @@ const updateUBP = asyncHandler(async (req, res) => {
   }
 });
 
-
 module.exports = {
+  AllUBPActivities,
   createUBP,
   getUBPActivity,
   getUbpDictionary,
   getSuggestions,
   uploadUBP,
-  updateUBP
+  updateUBP,
 };

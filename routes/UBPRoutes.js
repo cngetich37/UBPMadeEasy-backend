@@ -8,12 +8,14 @@ const {
   getSuggestions,
   uploadUBP,
   updateUBP,
+  AllUBPActivities,
 } = require("../controllers/UBPController");
 const router = express.Router();
 
 router.route("/ubpdictionary").get(getUbpDictionary);
 router.route("/ubpdictionary/:commonBusinessActivity").get(getSuggestions);
 router.route("/").post(createUBP);
+router.route("/").get(AllUBPActivities);
 router.route("/:commonBusinessActivity").get(getUBPActivity);
 router.route("/uploadUBP").post(upload.single("file"), uploadUBP);
 router.route("/updateUBP").post(upload.single("file"), updateUBP);
