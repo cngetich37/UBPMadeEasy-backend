@@ -121,7 +121,7 @@ const getSuggestions = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc upload UBP
+// @desc upload bulk UBP
 // @route POST /api/naics/uploadUBP
 // @access public
 const uploadUBP = asyncHandler(async (req, res) => {
@@ -192,10 +192,73 @@ const uploadUBP = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc update bulk UBP
+// @route PUT /api/naics/updateUBP
+// @access public
+
+const updateUBP = asyncHandler(async (req, res) => {
+  try {
+    const { commonBusinessActivity, naicsCode } = req.body;
+
+    if (!commonBusinessActivity || !naicsCode) {
+      return res.status(400).json({
+        error: "Common Business Activity and NAICS Code are required",
+      });
+    }
+
+    if (commonBusinessActivity.length !== naicsCode.length) {
+      return res.status(400).json({
+        error:
+          "Common Business Activity and NAICS Code arrays must have the same length",
+      });
+    }
+
+    const createdEntries = [];
+    for (let i = 0; i < commonBusinessActivity.length; i++) {
+      const commonBusinessActivityItem = commonBusinessActivity[i];
+      const naicsCodeItem = naicsCode[i];
+
+      const regex = new RegExp(`^${commonBusinessActivityItem}$`, "i");
+      let UBPAvailable = await UBP.findOne({ commonBusinessActivity: regex });
+
+      if (UBPAvailable) {
+        // If UBP entry already exists, update it
+        UBPAvailable.industry = naicsCodeItem.substring(0, 2);
+        UBPAvailable.businessCategory = naicsCodeItem.substring(0, 3);
+        UBPAvailable.businessSubCategory = naicsCodeItem.substring(0, 4);
+        UBPAvailable.businessActivity = naicsCodeItem.substring(0, 5);
+        await UBPAvailable.save();
+        createdEntries.push(UBPAvailable);
+      } else {
+        // If UBP entry doesn't exist, create a new one
+        const naicsCategories = {
+          commonBusinessActivity: commonBusinessActivityItem,
+          industry: naicsCodeItem.substring(0, 2),
+          businessCategory: naicsCodeItem.substring(0, 3),
+          businessSubCategory: naicsCodeItem.substring(0, 4),
+          businessActivity: naicsCodeItem.substring(0, 5),
+        };
+        const createdEntry = await UBP.create(naicsCategories);
+        createdEntries.push(createdEntry);
+      }
+    }
+
+    res.status(201).json({
+      message: "Business Activities added successfully",
+      createdEntries,
+    });
+  } catch (error) {
+    console.error("Error adding UBP Business Activities:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 module.exports = {
   createUBP,
   getUBPActivity,
   getUbpDictionary,
   getSuggestions,
   uploadUBP,
+  updateUBP
 };

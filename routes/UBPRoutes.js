@@ -7,6 +7,7 @@ const {
   getUbpDictionary,
   getSuggestions,
   uploadUBP,
+  updateUBP,
 } = require("../controllers/UBPController");
 const router = express.Router();
 
@@ -15,4 +16,5 @@ router.route("/ubpdictionary/:commonBusinessActivity").get(getSuggestions);
 router.route("/").post(createUBP);
 router.route("/:commonBusinessActivity").get(getUBPActivity);
 router.route("/uploadUBP").post(upload.single("file"), uploadUBP);
+router.route("/updateUBP").post(upload.single("file"), updateUBP);
 module.exports = router;
