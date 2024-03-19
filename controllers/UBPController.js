@@ -193,7 +193,7 @@ const uploadUBP = asyncHandler(async (req, res) => {
 });
 
 // @desc update bulk UBP
-// @route PUT /api/naics/updateUBP
+// @route POST /api/naics/updateUBP
 // @access public
 
 const updateUBP = asyncHandler(async (req, res) => {
