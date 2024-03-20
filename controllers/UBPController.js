@@ -78,11 +78,11 @@ const getUBPActivity = asyncHandler(async (req, res) => {
 // @access public
 const getUbpDictionary = asyncHandler(async (req, res) => {
   try {
-    // Assuming UBP is a model representing suggestions, modify the query accordingly
+    //UBP is a model representing suggestions, modify the query accordingly
     const ubpDictionary = await UBP.find(
       {},
       { commonBusinessActivity: 1, _id: 0 }
-    ); // Adjust "commonBusinessActivity" to your actual field name
+    ); 
 
     res.status(200).json(ubpDictionary);
   } catch (error) {
