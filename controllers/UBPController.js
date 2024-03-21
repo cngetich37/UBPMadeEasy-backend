@@ -308,7 +308,11 @@ const getUBPIndustryCode = asyncHandler(async (req, res) => {
   const { industryCode } = req.params;
 
   // Search for the specific Industry
-  const ubpIndustry = await Industry.findOne({ industryCode });
+  const regex = new RegExp(
+    `^${industryCode.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")}$`,
+    "i"
+  );
+  const ubpIndustry = await Industry.findOne({ industryCode: regex });
 
   if (!ubpIndustry) {
     res.status(404);
