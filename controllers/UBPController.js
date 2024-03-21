@@ -520,6 +520,102 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc upload Business Activities
+// @route POST /api/naics/uploadBusinessActivities
+// @access public
+
+const uploadBusinessActivities = asyncHandler(async (req, res) => {
+  try {
+    const { businessActivity, businessActivityCode } = req.body;
+
+    if (!businessActivity || !businessActivityCode) {
+      res.status(400);
+      throw new Error(
+        "Business Activity and Business Activity Code are required"
+      );
+    }
+
+    if (businessActivity.length !== businessActivityCode.length) {
+      res.status(400);
+      throw new Error(
+        "Business Activity and Business Activity Code arrays must have the same length"
+      );
+    }
+
+    const createdEntries = [];
+    for (let i = 0; i < businessActivity.length; i++) {
+      const BusinessActivityItem = businessActivity[i];
+      const businessActivityCodeItem = businessActivityCode[i];
+
+      const regex = new RegExp(`^${BusinessActivityItem}$`, "i");
+      let BusinessActivityAvailable = await BusinessActivity.findOne({
+        businessSubCategory: regex,
+      });
+
+      if (BusinessActivityAvailable) {
+        // If UBP entry already exists, update it
+        BusinessActivityAvailable.businessActivity = BusinessActivityItem;
+        BusinessActivityAvailable.businessActivityCode = businessActivityItem;
+        await BusinessActivityAvailable.save();
+        createdEntries.push(BusinessActivityAvailable);
+      } else {
+        // If the Business Activity doesn't exist, create a new one
+        const businessActivities = {
+          businessActivity: BusinessActivityItem,
+          businessActivityCode: businessActivityCodeItem,
+        };
+        const createdEntry = await BusinessActivity.create(businessActivities);
+        createdEntries.push(createdEntry);
+      }
+    }
+    res.status(201).json({
+      message: "Business Activities added successfully",
+      createdEntries,
+    });
+  } catch (error) {
+    res.status(500);
+    throw new Error("Internal server error");
+  }
+});
+
+// @desc Get a UBP Business SubCategories by business Subcategory code
+// @route GET /api/naics/businessactivities/:businessActivityCode
+// @access public
+const getUBPBusinessActivityCode = asyncHandler(async (req, res) => {
+  try {
+    const { businessActivityCode } = req.params;
+
+    console.log("Business Activity Code:", businessActivityCode);
+
+    let regex;
+    if (businessActivityCode.includes("-")) {
+      regex = new RegExp(`^${businessActivityCode}$`, "i");
+    } else {
+      regex = new RegExp(
+        `^(${businessActivityCode}|\\d+-${businessActivityCode}|${businessActivityCode}-\\d+)$`,
+        "i"
+      );
+    }
+
+    console.log("Regex:", regex);
+
+    const ubpBusinessActivity = await BusinessActivity.findOne({
+      businessSubCategoryCode: regex,
+    });
+
+    console.log("Business Activity found:", ubpBusinessActivity);
+
+    if (!ubpBusinessActivity) {
+      res.status(404).json({ error: "Business Activity not found!" });
+    } else {
+      res.status(200).json(ubpBusinessActivity);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 module.exports = {
   AllUBPActivities,
   AllUBPIndustries,
@@ -535,4 +631,6 @@ module.exports = {
   getUBPBusinessCategoryCode,
   uploadBusinessSubCategories,
   getUBPBusinessSubCategoryCode,
+  uploadBusinessActivities,
+  getUBPBusinessActivityCode,
 };
