@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const UBP = require("../models/UBPModel");
 const Industry = require("../models/IndustryModel");
 const BusinessCategory = require("../models/BusinessCategoryModel");
+const BusinessSubCategory = require("../models/BusinessSubCategoryModel");
 const { Error } = require("mongoose");
 
 // @desc Get All UBP Activities
@@ -418,6 +419,97 @@ const getUBPBusinessCategoryCode = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc upload Business SubCategories
+// @route POST /api/naics/uploadBusinessSubCategories
+// @access public
+
+const uploadBusinessSubCategories = asyncHandler(async (req, res) => {
+  try {
+    const { businessSubCategory, businessSubCategoryCode } = req.body;
+
+    if (!businessSubCategory || !businessSubCategoryCode) {
+      res.status(400);
+      throw new Error(
+        "Business SubCategory and Business SubCategory Code are required"
+      );
+    }
+
+    if (businessSubCategory.length !== businessSubCategoryCode.length) {
+      res.status(400);
+      throw new Error(
+        "Business SubCategory and Business SubCategory Code arrays must have the same length"
+      );
+    }
+
+    const createdEntries = [];
+    for (let i = 0; i < businessSubCategory.length; i++) {
+      const BusinessSubCategoryItem = businessSubCategory[i];
+      const businessSubCategoryCodeItem = businessSubCategoryCode[i];
+
+      const regex = new RegExp(`^${BusinessSubCategoryItem}$`, "i");
+      let BusinessSubCategoryAvailable = await BusinessSubCategory.findOne({
+        businessSubCategory: regex,
+      });
+
+      if (BusinessSubCategoryAvailable) {
+        // If UBP entry already exists, update it
+        BusinessSubCategoryAvailable.businessSubCategory =
+          BusinessSubCategoryItem;
+        BusinessSubCategoryAvailable.businessSubCategoryCode =
+          businessSubCategoryCodeItem;
+        await BusinessSubCategoryAvailable.save();
+        createdEntries.push(BusinessSubCategoryAvailable);
+      } else {
+        // If UBP entry doesn't exist, create a new one
+        const businessSubCategories = {
+          businessSubCategory: BusinessSubCategoryItem,
+          businessSubCategoryCode: businessSubCategoryCodeItem,
+        };
+        const createdEntry = await BusinessSubCategory.create(
+          businessSubCategories
+        );
+        createdEntries.push(createdEntry);
+      }
+    }
+
+    res.status(201).json({
+      message: "Business SubCategories added successfully",
+      createdEntries,
+    });
+  } catch (error) {
+    res.status(500);
+    throw new Error("Internal server error");
+  }
+});
+
+// @desc Get a UBP Business SubCategories by business Subcategory code
+// @route GET /api/naics/businesssubcategories/:businesssubCategoryCode
+// @access public
+const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
+  const { businessSubCategoryCode } = req.params;
+
+  // Search for the specific Business SubCategory
+  let regex;
+  if (businessSubCategoryCode.includes("-")) {
+    regex = new RegExp(`^${businessSubCategoryCode}$`, "i");
+  } else {
+    regex = new RegExp(
+      `^(${businessSubCategoryCode}|\\d+-${businessSubCategoryCode}|${businessSubCategoryCode}-\\d+)$`,
+      "i"
+    );
+  }
+
+  const ubpBusinessSubCategory = await BusinessSubCategory.findOne({
+    businessSubCategoryCode: regex,
+  });
+
+  if (!ubpBusinessSubCategory) {
+    res.status(404);
+    throw new Error("Business SubCategory not found!");
+  } else {
+    res.status(200).json(ubpBusinessSubCategory);
+  }
+});
 module.exports = {
   AllUBPActivities,
   AllUBPIndustries,
@@ -430,5 +522,7 @@ module.exports = {
   createIndustry,
   getUBPIndustryCode,
   uploadBusinessCategories,
-  getUBPBusinessCategoryCode
+  getUBPBusinessCategoryCode,
+  uploadBusinessSubCategories,
+  getUBPBusinessSubCategoryCode
 };
