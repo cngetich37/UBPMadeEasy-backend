@@ -521,8 +521,8 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc Get a UBP Business Activities by Business Activity code
-// @route GET /api/naics/businessactivities/:businessActivityCode
+// @desc Upload UBP Bulk Business Activities
+// @route GET /api/naics/uploadBusinessActivities
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
@@ -600,7 +600,7 @@ const getUBPBusinessActivityCode = asyncHandler(async (req, res) => {
     console.log("Regex:", regex);
 
     const ubpBusinessActivity = await BusinessActivity.findOne({
-      businessSubCategoryCode: regex,
+      businessActivityCode: regex,
     });
 
     console.log("Business Activity found:", ubpBusinessActivity);

@@ -17,6 +17,7 @@ const {
   uploadBusinessSubCategories,
   getUBPBusinessSubCategoryCode,
   uploadBusinessActivities,
+  getUBPBusinessActivityCode,
 } = require("../controllers/UBPController");
 const router = express.Router();
 
@@ -34,7 +35,7 @@ router
   .get(getUBPBusinessSubCategoryCode);
 router
   .route("/businessactivities/:businessActivityCode")
-  .get(getUBPBusinessSubCategoryCode);
+  .get(getUBPBusinessActivityCode);
 router.route("/").get(AllUBPActivities);
 router.route("/:commonBusinessActivity").get(getUBPActivity);
 router.route("/uploadUBP").post(upload.single("file"), uploadUBP);

@@ -4,11 +4,11 @@ const businessActivitySchema = mongoose.Schema(
   {
     businessActivity: {
       type: String,
-      required: [true, "Please add the business sub category"],
+      required: [true, "Please add the business activity"],
     },
     businessActivityCode: {
       type: String,
-      required: [true, "Please add the business subcategory code"],
+      required: [true, "Please add the business activity code"],
     },
   },
   {
