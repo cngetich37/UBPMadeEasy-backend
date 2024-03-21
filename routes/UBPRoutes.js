@@ -28,8 +28,8 @@ router.route("/industry/:industryCode").get(getUBPIndustryCode);
 router
   .route("/businesscategories/:businessCategoryCode")
   .get(getUBPBusinessCategoryCode);
-  router
-  .route("/businesssubcategories/:businesssubCategoryCode")
+router
+  .route("/businesssubcategories/:businessSubCategoryCode")
   .get(getUBPBusinessSubCategoryCode);
 router.route("/").get(AllUBPActivities);
 router.route("/:commonBusinessActivity").get(getUBPActivity);

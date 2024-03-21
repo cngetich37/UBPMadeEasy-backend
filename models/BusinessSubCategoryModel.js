@@ -4,7 +4,7 @@ const businessSubCategorySchema = mongoose.Schema(
   {
     businessSubCategory: {
       type: String,
-      required: [true, "Please add the business sub category"],
+      required: [true, "Please add the business subcategory"],
     },
     businessSubCategoryCode: {
       type: String,

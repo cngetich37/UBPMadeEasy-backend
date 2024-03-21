@@ -486,30 +486,40 @@ const uploadBusinessSubCategories = asyncHandler(async (req, res) => {
 // @route GET /api/naics/businesssubcategories/:businesssubCategoryCode
 // @access public
 const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
-  const { businessSubCategoryCode } = req.params;
+  try {
+    const { businessSubCategoryCode } = req.params;
 
-  // Search for the specific Business SubCategory
-  let regex;
-  if (businessSubCategoryCode.includes("-")) {
-    regex = new RegExp(`^${businessSubCategoryCode}$`, "i");
-  } else {
-    regex = new RegExp(
-      `^(${businessSubCategoryCode}|\\d+-${businessSubCategoryCode}|${businessSubCategoryCode}-\\d+)$`,
-      "i"
-    );
-  }
+    console.log("Business SubCategory Code:", businessSubCategoryCode);
 
-  const ubpBusinessSubCategory = await BusinessSubCategory.findOne({
-    businessSubCategoryCode: regex,
-  });
+    let regex;
+    if (businessSubCategoryCode.includes("-")) {
+      regex = new RegExp(`^${businessSubCategoryCode}$`, "i");
+    } else {
+      regex = new RegExp(
+        `^(${businessSubCategoryCode}|\\d+-${businessSubCategoryCode}|${businessSubCategoryCode}-\\d+)$`,
+        "i"
+      );
+    }
 
-  if (!ubpBusinessSubCategory) {
-    res.status(404);
-    throw new Error("Business SubCategory not found!");
-  } else {
-    res.status(200).json(ubpBusinessSubCategory);
+    console.log("Regex:", regex);
+
+    const ubpBusinessSubCategory = await BusinessSubCategory.findOne({
+      businessSubCategoryCode: regex,
+    });
+
+    console.log("Business SubCategory found:", ubpBusinessSubCategory);
+
+    if (!ubpBusinessSubCategory) {
+      res.status(404).json({ error: "Business SubCategory not found!" });
+    } else {
+      res.status(200).json(ubpBusinessSubCategory);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 module.exports = {
   AllUBPActivities,
   AllUBPIndustries,
@@ -524,5 +534,5 @@ module.exports = {
   uploadBusinessCategories,
   getUBPBusinessCategoryCode,
   uploadBusinessSubCategories,
-  getUBPBusinessSubCategoryCode
+  getUBPBusinessSubCategoryCode,
 };
