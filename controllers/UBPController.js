@@ -3,6 +3,7 @@ const UBP = require("../models/UBPModel");
 const Industry = require("../models/IndustryModel");
 const BusinessCategory = require("../models/BusinessCategoryModel");
 const BusinessSubCategory = require("../models/BusinessSubCategoryModel");
+const BusinessActivity = require("../models/BusinessActivityModel");
 const { Error } = require("mongoose");
 
 // @desc Get All UBP Activities
