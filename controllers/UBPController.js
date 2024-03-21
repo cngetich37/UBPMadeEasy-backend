@@ -389,6 +389,35 @@ const uploadBusinessCategories = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc Get a UBP Business Categories by business category code
+// @route GET /api/naics/businesscategories/:businessCategoryCode
+// @access public
+const getUBPBusinessCategoryCode = asyncHandler(async (req, res) => {
+  const { businessCategoryCode } = req.params;
+
+  // Search for the specific Industry
+  let regex;
+  if (businessCategoryCode.includes("-")) {
+    regex = new RegExp(`^${businessCategoryCode}$`, "i");
+  } else {
+    regex = new RegExp(
+      `^(${businessCategoryCode}|\\d+-${businessCategoryCode}|${businessCategoryCode}-\\d+)$`,
+      "i"
+    );
+  }
+
+  const ubpBusinessCategory = await BusinessCategory.findOne({
+    businessCategoryCode: regex,
+  });
+
+  if (!ubpBusinessCategory) {
+    res.status(404);
+    throw new Error("Business Category not found!");
+  } else {
+    res.status(200).json(ubpBusinessCategory);
+  }
+});
+
 module.exports = {
   AllUBPActivities,
   AllUBPIndustries,
@@ -401,4 +430,5 @@ module.exports = {
   createIndustry,
   getUBPIndustryCode,
   uploadBusinessCategories,
+  getUBPBusinessCategoryCode
 };
