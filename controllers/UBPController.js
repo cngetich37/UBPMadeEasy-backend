@@ -270,6 +270,13 @@ const createIndustry = asyncHandler(async (req, res) => {
     throw new Error("Industry & Industrycode are required!");
   }
 
+  // Check if industry with the same industry code already exists
+  const existingIndustry = await Industry.findOne({ industryCode });
+  if (existingIndustry) {
+    res.status(400);
+    throw new Error("An industry with the same industry code already exists!");
+  }
+
   // Check if UBP Industry already exists
   const regex = new RegExp(`^${industry}$`, "i");
   const UBPIndustry = await Industry.findOne({ industry: regex });
