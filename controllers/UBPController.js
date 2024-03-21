@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const UBP = require("../models/UBPModel");
 const Industry = require("../models/IndustryModel");
+const BusinessCategory = require("../models/BusinessCategoryModel");
 const { Error } = require("mongoose");
 
 // @desc Get All UBP Activities
@@ -328,6 +329,66 @@ const getUBPIndustryCode = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc upload Business Categories
+// @route POST /api/naics/uploadBusinessCategories
+// @access public
+
+const uploadBusinessCategories = asyncHandler(async (req, res) => {
+  try {
+    const { businessCategory, businessCategoryCode } = req.body;
+
+    if (!businessCategory || !businessCategoryCode) {
+      res.status(400);
+      throw new Error(
+        "Business Category and Business Category Code are required"
+      );
+    }
+
+    if (businessCategory.length !== businessCategoryCode.length) {
+      res.status(400);
+      throw new Error(
+        "Business Category and Business Category Code arrays must have the same length"
+      );
+    }
+
+    const createdEntries = [];
+    for (let i = 0; i < businessCategory.length; i++) {
+      const BusinessCategoryItem = businessCategory[i];
+      const businessCategoryCodeItem = businessCategoryCode[i];
+
+      const regex = new RegExp(`^${BusinessCategoryItem}$`, "i");
+      let BusinessCategoryAvailable = await BusinessCategory.findOne({
+        businessCategory: regex,
+      });
+
+      if (BusinessCategoryAvailable) {
+        // If UBP entry already exists, update it
+        BusinessCategoryAvailable.businessCategory = BusinessCategoryItem;
+        BusinessCategoryAvailable.businessCategoryCode =
+          businessCategoryCodeItem;
+        await BusinessCategoryAvailable.save();
+        createdEntries.push(BusinessCategoryAvailable);
+      } else {
+        // If UBP entry doesn't exist, create a new one
+        const businessCategories = {
+          businessCategory: BusinessCategoryItem,
+          businessCategoryCode: businessCategoryCodeItem,
+        };
+        const createdEntry = await BusinessCategory.create(businessCategories);
+        createdEntries.push(createdEntry);
+      }
+    }
+
+    res.status(201).json({
+      message: "Business Categories added successfully",
+      createdEntries,
+    });
+  } catch (error) {
+    res.status(500);
+    throw new Error("Internal server error");
+  }
+});
+
 module.exports = {
   AllUBPActivities,
   AllUBPIndustries,
@@ -339,4 +400,5 @@ module.exports = {
   updateUBP,
   createIndustry,
   getUBPIndustryCode,
+  uploadBusinessCategories,
 };
