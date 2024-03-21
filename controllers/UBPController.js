@@ -1,5 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const UBP = require("../models/UBPModel");
+const Industry = require("../models/IndustryModel");
+const { Error } = require("mongoose");
 
 // @desc Get All UBP Activities
 // @route GET /api/naics
@@ -7,6 +9,14 @@ const UBP = require("../models/UBPModel");
 const AllUBPActivities = asyncHandler(async (req, res) => {
   const ubpActivities = await UBP.find();
   res.status(200).json(ubpActivities);
+});
+
+// @desc Get All UBP Industries
+// @route GET /api/naics/industry
+// @access public
+const AllUBPIndustries = asyncHandler(async (req, res) => {
+  const ubpIndustries = await Industry.find();
+  res.status(200).json(ubpIndustries);
 });
 
 // @desc Create UBP
@@ -18,9 +28,8 @@ const createUBP = asyncHandler(async (req, res) => {
 
   // Check if required fields are provided
   if (!naicsCode || !commonBusinessActivity) {
-    return res
-      .status(400)
-      .json({ error: "NAICS code & CommonBusiness Activity are required" });
+    res.status(400);
+    throw new Error("NAICS code & CommonBusiness Activity are required");
   }
 
   // Check if UBP Activity already exists
@@ -44,8 +53,8 @@ const createUBP = asyncHandler(async (req, res) => {
     await UBP.create(naicsCategories);
     res.status(201).json({ message: "Business Activity added successfully" });
   } catch (error) {
-    console.error("Error adding UBP Business Activity:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500);
+    throw new Error("Internal server error");
   }
 });
 // @desc Get a UBP Activity by Common Business Activity
@@ -67,7 +76,8 @@ const getUBPActivity = asyncHandler(async (req, res) => {
   });
 
   if (!ubpActivity) {
-    res.status(404).json({ message: "Business Activity not found" });
+    res.status(404);
+    throw new Error("Business Activity not found");
   } else {
     res.status(200).json(ubpActivity);
   }
@@ -82,12 +92,12 @@ const getUbpDictionary = asyncHandler(async (req, res) => {
     const ubpDictionary = await UBP.find(
       {},
       { commonBusinessActivity: 1, _id: 0 }
-    ); 
+    );
 
     res.status(200).json(ubpDictionary);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500);
+    throw new Error("Server Error");
   }
 });
 
@@ -99,7 +109,7 @@ const getSuggestions = asyncHandler(async (req, res) => {
 
   try {
     // Create a regex pattern to match partial input anywhere within the string
-    const regexPattern = new RegExp(`${commonBusinessActivity}`, 'i');
+    const regexPattern = new RegExp(`${commonBusinessActivity}`, "i");
 
     // Search for business activities that contain the partial input value
     const ubpActivities = await UBP.find(
@@ -108,22 +118,24 @@ const getSuggestions = asyncHandler(async (req, res) => {
     );
 
     // Extract only the "commonBusinessActivity" field from the documents
-    const suggestions = ubpActivities.map(activity => activity.commonBusinessActivity);
+    const suggestions = ubpActivities.map(
+      (activity) => activity.commonBusinessActivity
+    );
 
     if (suggestions.length === 0) {
       // No matching suggestions found
-      res.status(404).json({ message: "No matching suggestions found" });
+      res.status(404);
+      throw new Error("No matching suggestions found");
     } else {
       // Return the matching suggestions
       res.status(200).json({ suggestions });
     }
   } catch (error) {
     // Handle errors
-    console.error("Error fetching suggestions:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500);
+    throw new Error("Internal server error");
   }
 });
-
 
 // @desc upload bulk UBP
 // @route POST /api/naics/uploadUBP
@@ -135,17 +147,16 @@ const uploadUBP = asyncHandler(async (req, res) => {
 
     // Check if required fields are provided
     if (!commonBusinessActivity || !naicsCode) {
-      return res.status(400).json({
-        error: "Common Business Activity and NAICS Code are required",
-      });
+      res.status(400);
+      throw new Error("Common Business Activity and NAICS Code are required");
     }
 
     // Check if arrays have the same length
     if (commonBusinessActivity.length !== naicsCode.length) {
-      return res.status(400).json({
-        error:
-          "Common Business Activity and NAICS Code arrays must have the same length",
-      });
+      res.status(400);
+      throw new Error(
+        "Common Business Activity and NAICS Code arrays must have the same length"
+      );
     }
 
     // Create UBP entries for each pair of commonBusinessActivity and naicsCode
@@ -158,10 +169,8 @@ const uploadUBP = asyncHandler(async (req, res) => {
       const regex = new RegExp(`^${commonBusinessActivityItem}$`, "i");
       const UBPAvailable = await UBP.findOne({ commonBusinessActivity: regex });
       if (UBPAvailable) {
-        return res.status(400).json({
-          error:
-            "UBP Activity already exists for: " + commonBusinessActivityItem,
-        });
+        res.status(400);
+        throw new Error("UBP Activity already exists");
       }
 
       // Break NAICS code into four categories and attach a Business Activity to it
@@ -183,8 +192,8 @@ const uploadUBP = asyncHandler(async (req, res) => {
       createdEntries,
     });
   } catch (error) {
-    console.error("Error adding UBP Business Activities:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500);
+    throw new Error("Internal server error");
   }
 });
 
@@ -197,16 +206,15 @@ const updateUBP = asyncHandler(async (req, res) => {
     const { commonBusinessActivity, naicsCode } = req.body;
 
     if (!commonBusinessActivity || !naicsCode) {
-      return res.status(400).json({
-        error: "Common Business Activity and NAICS Code are required",
-      });
+      res.status(400);
+      throw new Error("Common Business Activity and NAICS Code are required");
     }
 
     if (commonBusinessActivity.length !== naicsCode.length) {
-      return res.status(400).json({
-        error:
-          "Common Business Activity and NAICS Code arrays must have the same length",
-      });
+      res.status(400);
+      throw new Error(
+        "Common Business Activity and NAICS Code arrays must have the same length"
+      );
     }
 
     const createdEntries = [];
@@ -244,17 +252,74 @@ const updateUBP = asyncHandler(async (req, res) => {
       createdEntries,
     });
   } catch (error) {
-    console.error("Error adding UBP Business Activities:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500);
+    throw new Error("Internal server error");
+  }
+});
+
+// @desc Create the UBP Industry
+// @route POST /api/naics/industry
+// @access public
+const createIndustry = asyncHandler(async (req, res) => {
+  // Extract the from the industry and industry code
+  const { industry, industryCode } = req.body;
+
+  // Check if required fields are provided
+  if (!industry || !industryCode) {
+    res.status(400);
+    throw new Error("Industry & Industrycode are required!");
+  }
+
+  // Check if UBP Industry already exists
+  const regex = new RegExp(`^${industry}$`, "i");
+  const UBPIndustry = await Industry.findOne({ industry: regex });
+  if (UBPIndustry) {
+    res.status(400);
+    throw new Error("UBP Industry already exists!");
+  }
+
+  // Add the Industry and the Industry Code
+  const industryCategories = {
+    industry: industry,
+    industryCode: industryCode,
+  };
+
+  try {
+    // Create UBP Industry
+    await Industry.create(industryCategories);
+    res.status(201).json({ message: "Industry added successfully" });
+  } catch (error) {
+    res.status(500);
+    throw new Error("Error adding Industry!");
+  }
+});
+
+// @desc Get a UBP Industry by industry code
+// @route GET /api/naics/industry/:industryCode
+// @access public
+const getUBPIndustryCode = asyncHandler(async (req, res) => {
+  const { industryCode } = req.params;
+
+  // Search for the specific Industry
+  const ubpIndustry = await Industry.findOne({ industryCode });
+
+  if (!ubpIndustry) {
+    res.status(404);
+    throw new Error("Industry not found");
+  } else {
+    res.status(200).json(ubpIndustry);
   }
 });
 
 module.exports = {
   AllUBPActivities,
+  AllUBPIndustries,
   createUBP,
   getUBPActivity,
   getUbpDictionary,
   getSuggestions,
   uploadUBP,
   updateUBP,
+  createIndustry,
+  getUBPIndustryCode,
 };
