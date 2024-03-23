@@ -38,7 +38,7 @@ const UBPBusinessSubCategories = asyncHandler(async (req, res) => {
 });
 
 // @desc Get UBP Business subCategories
-// @route GET /api/naics/businesssubcategories
+// @route GET /api/naics/businessactivities
 // @access public
 const UBPBusinessActivities = asyncHandler(async (req, res) => {
   const ubpBusinessActivities = await BusinessActivity.find();

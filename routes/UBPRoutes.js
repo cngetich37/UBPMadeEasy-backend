@@ -20,6 +20,7 @@ const {
   getUBPBusinessActivityCode,
   UBPBusinessCategories,
   UBPBusinessSubCategories,
+  UBPBusinessActivities,
 } = require("../controllers/UBPController");
 const router = express.Router();
 
@@ -30,7 +31,7 @@ router.route("/industry").post(createIndustry);
 router.route("/industries").get(UBPIndustries);
 router.route("/businesscategories").get(UBPBusinessCategories);
 router.route("/businesssubcategories").get(UBPBusinessSubCategories);
-router.route("/businessactivities").get(UBPActivities);
+router.route("/businessactivities").get(UBPBusinessActivities);
 router.route("/industry/:industryCode").get(getUBPIndustryCode);
 router
   .route("/businesscategories/:businessCategoryCode")
