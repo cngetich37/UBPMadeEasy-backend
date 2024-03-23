@@ -92,8 +92,11 @@ const getUBPActivity = asyncHandler(async (req, res) => {
   const singularRegex = new RegExp(`^${commonBusinessActivity}$`, "i");
   const pluralRegex = new RegExp(`^${commonBusinessActivity}s?$`, "i");
 
-  // Create text search regex
-  const textSearchRegex = new RegExp(`${commonBusinessActivity}`, "i");
+  // Create text search regex for specific patterns
+  const textSearchRegex = new RegExp(
+    `${commonBusinessActivity.replace(/\(/g, "\\(").replace(/\)/g, "\\)")}`,
+    "i"
+  );
 
   // Search for both singular, plural forms, and text search
   const ubpActivity = await UBP.findOne({
