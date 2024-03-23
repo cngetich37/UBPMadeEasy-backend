@@ -8,9 +8,9 @@ const {
   getSuggestions,
   uploadUBP,
   updateUBP,
-  AllUBPActivities,
+  UBPActivities,
   createIndustry,
-  AllUBPIndustries,
+  UBPIndustries,
   getUBPIndustryCode,
   uploadBusinessCategories,
   getUBPBusinessCategoryCode,
@@ -18,6 +18,8 @@ const {
   getUBPBusinessSubCategoryCode,
   uploadBusinessActivities,
   getUBPBusinessActivityCode,
+  UBPBusinessCategories,
+  UBPBusinessSubCategories,
 } = require("../controllers/UBPController");
 const router = express.Router();
 
@@ -25,7 +27,10 @@ router.route("/ubpdictionary").get(getUbpDictionary);
 router.route("/ubpdictionary/:commonBusinessActivity").get(getSuggestions);
 router.route("/").post(createUBP);
 router.route("/industry").post(createIndustry);
-router.route("/industry").get(AllUBPIndustries);
+router.route("/industries").get(UBPIndustries);
+router.route("/businesscategories").get(UBPBusinessCategories);
+router.route("/businesssubcategories").get(UBPBusinessSubCategories);
+router.route("/businessactivities").get(UBPActivities);
 router.route("/industry/:industryCode").get(getUBPIndustryCode);
 router
   .route("/businesscategories/:businessCategoryCode")
@@ -36,7 +41,7 @@ router
 router
   .route("/businessactivities/:businessActivityCode")
   .get(getUBPBusinessActivityCode);
-router.route("/").get(AllUBPActivities);
+router.route("/").get(UBPActivities);
 router.route("/:commonBusinessActivity").get(getUBPActivity);
 router.route("/uploadUBP").post(upload.single("file"), uploadUBP);
 router.route("/updateUBP").post(upload.single("file"), updateUBP);

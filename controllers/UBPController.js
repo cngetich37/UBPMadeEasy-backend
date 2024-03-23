@@ -6,22 +6,44 @@ const BusinessSubCategory = require("../models/BusinessSubCategoryModel");
 const BusinessActivity = require("../models/BusinessActivityModel");
 const { Error } = require("mongoose");
 
-// @desc Get All UBP Activities
+// @desc Get UBP common Business Activities
 // @route GET /api/naics
 // @access public
-const AllUBPActivities = asyncHandler(async (req, res) => {
+const UBPActivities = asyncHandler(async (req, res) => {
   const ubpActivities = await UBP.find();
   res.status(200).json(ubpActivities);
 });
 
-// @desc Get All UBP Industries
-// @route GET /api/naics/industry
+// @desc Get UBP Industries
+// @route GET /api/naics/industries
 // @access public
-const AllUBPIndustries = asyncHandler(async (req, res) => {
+const UBPIndustries = asyncHandler(async (req, res) => {
   const ubpIndustries = await Industry.find();
   res.status(200).json(ubpIndustries);
 });
+// @desc Get UBP Business Categories
+// @route GET /api/naics/businesscategories
+// @access public
+const UBPBusinessCategories = asyncHandler(async (req, res) => {
+  const ubpBusinessCategories = await BusinessCategory.find();
+  res.status(200).json(ubpBusinessCategories);
+});
 
+// @desc Get UBP Business subCategories
+// @route GET /api/naics/businesscategories
+// @access public
+const UBPBusinessSubCategories = asyncHandler(async (req, res) => {
+  const ubpBusinessSubCategories = await BusinessSubCategory.find();
+  res.status(200).json(ubpBusinessSubCategories);
+});
+
+// @desc Get UBP Business subCategories
+// @route GET /api/naics/businesssubcategories
+// @access public
+const UBPBusinessActivities = asyncHandler(async (req, res) => {
+  const ubpBusinessActivities = await BusinessActivity.find();
+  res.status(200).json(ubpBusinessActivities);
+});
 // @desc Create UBP
 // @route POST /api/naics
 // @access public
@@ -617,8 +639,11 @@ const getUBPBusinessActivityCode = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  AllUBPActivities,
-  AllUBPIndustries,
+  UBPActivities,
+  UBPIndustries,
+  UBPBusinessCategories,
+  UBPBusinessSubCategories,
+  UBPBusinessActivities,
   createUBP,
   getUBPActivity,
   getUbpDictionary,
