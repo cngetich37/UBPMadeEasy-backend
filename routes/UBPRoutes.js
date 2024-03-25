@@ -21,6 +21,8 @@ const {
   UBPBusinessCategories,
   UBPBusinessSubCategories,
   UBPBusinessActivities,
+  getNaicsCodeFinanceAct,
+  uploadFinanceAct,
 } = require("../controllers/UBPController");
 const router = express.Router();
 
@@ -42,10 +44,12 @@ router
 router
   .route("/businessactivities/:businessActivityCode")
   .get(getUBPBusinessActivityCode);
+router.route("/financeact/:naicsCode").get(getNaicsCodeFinanceAct);
 router.route("/").get(UBPActivities);
 router.route("/:commonBusinessActivity").get(getUBPActivity);
 router.route("/uploadUBP").post(upload.single("file"), uploadUBP);
 router.route("/updateUBP").post(upload.single("file"), updateUBP);
+router.route("/uploadFinanceAct").post(upload.single("file"), uploadFinanceAct);
 router
   .route("/uploadBusinessCategories")
   .post(upload.single("file"), uploadBusinessCategories);

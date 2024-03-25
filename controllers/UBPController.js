@@ -4,6 +4,7 @@ const Industry = require("../models/IndustryModel");
 const BusinessCategory = require("../models/BusinessCategoryModel");
 const BusinessSubCategory = require("../models/BusinessSubCategoryModel");
 const BusinessActivity = require("../models/BusinessActivityModel");
+const FinanceAct = require("../models/FinanceActModel");
 const { Error } = require("mongoose");
 
 // @desc Get UBP common Business Activities
@@ -560,8 +561,7 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
 
     if (!businessActivity || !businessActivityCode) {
       return res.status(400).json({
-        error:
-          "Business Activity and Business Activity Code are required",
+        error: "Business Activity and Business Activity Code are required",
       });
     }
 
@@ -611,7 +611,133 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+// @desc Upload FinanceAct
+// @route GET /api/naics/uploadFinanceAct
+// @access public
+const uploadFinanceAct = asyncHandler(async (req, res) => {
+  try {
+    const {
+      brimCode,
+      naicsCode,
+      subCategory,
+      businessDescription,
+      tradeLicence,
+      fireClearance,
+      foodHygiene,
+      healthCertificate,
+      pestControl,
+    } = req.body;
 
+    if (
+      !brimCode ||
+      !naicsCode ||
+      !subCategory ||
+      !businessDescription ||
+      !tradeLicence ||
+      !fireClearance ||
+      !foodHygiene ||
+      !healthCertificate ||
+      !pestControl
+    ) {
+      return res.status(400).json({
+        error: "All fields  are required!",
+      });
+    }
+
+    if (
+      brimCode.length !== naicsCode.length ||
+      brimCode.length !== subCategory.length ||
+      brimCode.length !== businessDescription.length ||
+      brimCode.length !== tradeLicence.length ||
+      brimCode.length !== fireClearance.length ||
+      brimCode.length !== foodHygiene.length ||
+      brimCode.length !== healthCertificate.length ||
+      brimCode.length !== pestControl.length
+    ) {
+      return res.status(400).json({
+        error: "All fields must have the same length",
+      });
+    }
+
+    const createdEntries = [];
+    for (let i = 0; i < brimCode.length; i++) {
+      const brimCodeItem = brimCode[i];
+      const naicsCodeItem = naicsCode[i];
+      const subCategoryItem = subCategory[i];
+      const businessDescriptionItem = businessDescription[i];
+      const tradeLicenceItem = tradeLicence[i];
+      const fireClearanceItem = fireClearance[i];
+      const foodHygieneItem = foodHygiene[i];
+      const healthCertificateItem = healthCertificate[i];
+      const pestControlItem = pestControl[i];
+
+      // checks
+      const maxLength = 255; // Define your maximum length here
+      let description = "";
+
+      // Convert to string if not already a string
+      if (typeof businessDescription === "string") {
+        description = businessDescription;
+      } else if (typeof businessDescription === "object") {
+        // Convert object to string
+        description = JSON.stringify(businessDescription);
+      } else {
+        // For other types, use default string conversion
+        description = String(businessDescription);
+      }
+
+      const escapedDescription = description.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        "\\$&"
+      );
+      const regex = new RegExp(
+        `^${escapedDescription.substring(0, maxLength)}$`,
+        "i"
+      );
+      let businessDescriptionAvailable = await FinanceAct.findOne({
+        businessDescription: regex,
+      });
+
+      if (businessDescriptionAvailable) {
+        // If Finanace Act Item already exists, update it
+        businessDescriptionAvailable.brimCode = brimCodeItem;
+        businessDescriptionAvailable.naicsCode = naicsCodeItem;
+        businessDescriptionAvailable.subCategory = subCategoryItem;
+        businessDescriptionAvailable.businessDescription =
+          businessDescriptionItem;
+        businessDescriptionAvailable.tradeLicence = tradeLicenceItem;
+        businessDescriptionAvailable.fireClearance = fireClearanceItem;
+        businessDescriptionAvailable.foodHygiene = foodHygieneItem;
+        businessDescriptionAvailable.healthCertificate = healthCertificateItem;
+        businessDescriptionAvailable.pestControl = pestControlItem;
+        await businessDescriptionAvailable.save();
+        createdEntries.push(businessDescriptionAvailable);
+      } else {
+        // If the Finance Act doesn't exist, create a new one
+        const financeAct = {
+          brimCode: brimCodeItem,
+          naicsCode: naicsCodeItem,
+          subCategory: subCategoryItem,
+          businessDescription: businessDescriptionItem,
+          tradeLicence: tradeLicenceItem,
+          fireClearance: fireClearanceItem,
+          foodHygiene: foodHygieneItem,
+          healthCertificate: healthCertificateItem,
+          pestControl: pestControlItem,
+        };
+        const createdEntry = await FinanceAct.create(financeAct);
+        createdEntries.push(createdEntry);
+      }
+    }
+    return res.status(201).json({
+      message: "Finance Act added successfully",
+      createdEntries,
+    });
+  } catch (error) {
+    console.error("Error in uploading Finance Act:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 // @desc Get a UBP Business SubCategories by business Subcategory code
 // @route GET /api/naics/businessactivities/:businessActivityCode
 // @access public
@@ -650,6 +776,44 @@ const getUBPBusinessActivityCode = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc Get the Finance Act by naics code
+// @route GET /api/naics/financeact/:naicsCode
+// @access public
+const getNaicsCodeFinanceAct = asyncHandler(async (req, res) => {
+  try {
+    const { naicsCode } = req.params;
+
+    console.log("Naics Code:", naicsCode);
+
+    let regex;
+    if (naicsCode.includes("-")) {
+      regex = new RegExp(`^${naicsCode}$`, "i");
+    } else {
+      regex = new RegExp(
+        `^(${naicsCode}|\\d+-${naicsCode}|${naicsCode}-\\d+)$`,
+        "i"
+      );
+    }
+
+    console.log("Regex:", regex);
+
+    const ubpFinanceAct = await FinanceAct.find({
+      naicsCode: regex,
+    });
+
+    console.log("Finance Act found:", ubpFinanceAct);
+
+    if (!ubpFinanceAct) {
+      res.status(404).json({ error: "Finance Act naics code not found!" });
+    } else {
+      res.status(200).json(ubpFinanceAct);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 module.exports = {
   UBPActivities,
   UBPIndustries,
@@ -670,4 +834,6 @@ module.exports = {
   getUBPBusinessSubCategoryCode,
   uploadBusinessActivities,
   getUBPBusinessActivityCode,
+  uploadFinanceAct,
+  getNaicsCodeFinanceAct,
 };
