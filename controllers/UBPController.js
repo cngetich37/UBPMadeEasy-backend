@@ -555,11 +555,13 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
-    const { businessActivity, businessActivityCode } = req.body;
+    const { businessActivity, businessActivityCode, businessTradeCode } =
+      req.body;
 
     if (!businessActivity || !businessActivityCode) {
       return res.status(400).json({
-        error: "Business Activity and Business Activity Code are required",
+        error:
+          "Business Activity and Business Activity Code are required",
       });
     }
 
@@ -574,10 +576,11 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
     for (let i = 0; i < businessActivity.length; i++) {
       const businessActivityItem = businessActivity[i];
       const businessActivityCodeItem = businessActivityCode[i];
+      const businessTradeCodeItem = businessTradeCode[i];
 
       const regex = new RegExp(`^${businessActivityItem}$`, "i");
       let BusinessActivityAvailable = await BusinessActivity.findOne({
-        businessSubCategory: regex,
+        businessActivity: regex,
       });
 
       if (BusinessActivityAvailable) {
@@ -585,6 +588,7 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
         BusinessActivityAvailable.businessActivity = businessActivityItem;
         BusinessActivityAvailable.businessActivityCode =
           businessActivityCodeItem;
+        BusinessActivityAvailable.businessTradeCode = businessTradeCodeItem;
         await BusinessActivityAvailable.save();
         createdEntries.push(BusinessActivityAvailable);
       } else {
@@ -592,6 +596,7 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
         const businessActivities = {
           businessActivity: businessActivityItem,
           businessActivityCode: businessActivityCodeItem,
+          businessTradeCode: businessTradeCodeItem,
         };
         const createdEntry = await BusinessActivity.create(businessActivities);
         createdEntries.push(createdEntry);

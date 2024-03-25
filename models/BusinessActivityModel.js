@@ -10,6 +10,10 @@ const businessActivitySchema = mongoose.Schema(
       type: String,
       required: [true, "Please add the business activity code"],
     },
+    businessTradeCode: {
+      type: String,
+      required: [true, "Please add the business trade code"],
+    },
   },
   {
     timestamps: true,
