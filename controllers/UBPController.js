@@ -27,8 +27,21 @@ const UBPIndustries = asyncHandler(async (req, res) => {
 // @access public
 const UBPFinanceAct = asyncHandler(async (req, res) => {
   const ubpFinance = await FinanceAct.find();
-  res.status(200).json(ubpFinance);
+
+  // Filter out undefined strings and replace them with "0"
+  const filteredFinance = ubpFinance.map((item) => {
+    const filteredItem = { ...item };
+    for (const key in filteredItem) {
+      if (filteredItem[key] === undefined) {
+        filteredItem[key] = "0";
+      }
+    }
+    return filteredItem;
+  });
+
+  res.status(200).json(filteredFinance);
 });
+
 // @desc Get UBP Business Categories
 // @route GET /api/naics/businesscategories
 // @access public
@@ -843,5 +856,5 @@ module.exports = {
   getUBPBusinessActivityCode,
   uploadFinanceAct,
   getNaicsCodeFinanceAct,
-  UBPFinanceAct
+  UBPFinanceAct,
 };
