@@ -22,6 +22,13 @@ const UBPIndustries = asyncHandler(async (req, res) => {
   const ubpIndustries = await Industry.find();
   res.status(200).json(ubpIndustries);
 });
+// @desc Get UBP Finance Act
+// @route GET /api/naics/financeact
+// @access public
+const UBPFinanceAct = asyncHandler(async (req, res) => {
+  const ubpFinance = await FinanceAct.find();
+  res.status(200).json(ubpFinance);
+});
 // @desc Get UBP Business Categories
 // @route GET /api/naics/businesscategories
 // @access public
@@ -836,4 +843,5 @@ module.exports = {
   getUBPBusinessActivityCode,
   uploadFinanceAct,
   getNaicsCodeFinanceAct,
+  UBPFinanceAct
 };
