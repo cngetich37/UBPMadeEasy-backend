@@ -26,20 +26,32 @@ const UBPIndustries = asyncHandler(async (req, res) => {
 // @route GET /api/naics/financeact
 // @access public
 const UBPFinanceAct = asyncHandler(async (req, res) => {
-  const ubpFinance = await FinanceAct.find();
+  try {
+    const ubpFinance = await FinanceAct.find();
 
-  // Filter out undefined strings and replace them with "0"
-  const filteredFinance = ubpFinance.map((item) => {
-    const filteredItem = { ...item };
-    for (const key in filteredItem) {
-      if (filteredItem[key] === undefined) {
-        filteredItem[key] = "0";
+    // Function to recursively replace undefined values with "0"
+    const replaceUndefined = (obj) => {
+      for (let key in obj) {
+        if (obj[key] === undefined) {
+          obj[key] = "0";
+        } else if (typeof obj[key] === "object") {
+          replaceUndefined(obj[key]);
+        }
       }
-    }
-    return filteredItem;
-  });
+      return obj;
+    };
 
-  res.status(200).json(filteredFinance);
+    // Filter out undefined strings and replace them with "0"
+    const filteredFinance = ubpFinance.map((item) => {
+      return replaceUndefined(item.toObject());
+    });
+
+    res.status(200).json(filteredFinance);
+  } catch (error) {
+    // Handle errors
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
 });
 
 // @desc Get UBP Business Categories
