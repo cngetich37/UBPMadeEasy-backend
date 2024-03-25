@@ -34,7 +34,7 @@ const UBPFinanceAct = asyncHandler(async (req, res) => {
       for (let key in obj) {
         if (obj[key] === undefined) {
           obj[key] = "0";
-        } else if (typeof obj[key] === "object") {
+        } else if (typeof obj[key] === "object" && obj[key] !== null) {
           replaceUndefined(obj[key]);
         }
       }
@@ -43,13 +43,14 @@ const UBPFinanceAct = asyncHandler(async (req, res) => {
 
     // Filter out undefined strings and replace them with "0"
     const filteredFinance = ubpFinance.map((item) => {
-      return replaceUndefined(item.toObject());
+      const filteredItem = replaceUndefined(item.toObject());
+      return filteredItem;
     });
 
     res.status(200).json(filteredFinance);
   } catch (error) {
     // Handle errors
-    console.error(error);
+    console.error("Error in UBPFinanceAct:", error);
     res.status(500).json({ message: "Server Error" });
   }
 });
