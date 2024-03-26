@@ -46,6 +46,16 @@ const UBPFinanceAct = asyncHandler(async (req, res) => {
       return replaceUndefined(item.toObject());
     });
 
+    // Modify the "foodHygiene" field to "0" if it's still "undefined"
+    filteredFinance.forEach(item => {
+      if (item.foodHygiene === undefined) {
+        console.log('Found undefined value for foodHygiene, setting to "0"');
+        item.foodHygiene = "0";
+      }
+    });
+
+    console.log('Filtered finance data:', filteredFinance);
+
     res.status(200).json(filteredFinance);
   } catch (error) {
     // Handle errors
@@ -53,6 +63,7 @@ const UBPFinanceAct = asyncHandler(async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 });
+
 
 // @desc Get UBP Business Categories
 // @route GET /api/naics/businesscategories
