@@ -591,39 +591,59 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
     const { businessActivity, businessActivityCode, businessTradeCode } =
       req.body;
 
-    if (!businessActivity || !businessActivityCode || !businessTradeCode) {
-      res.status(400);
-      throw new Error(
-        "Business Activity, Business Activity Code, and Business Trade Code are required"
-      );
-    }
-
-    const regex = new RegExp(`^${businessActivity}$`, "i");
-    let existingActivity = await BusinessActivity.findOne({
-      businessActivity: regex,
-      businessActivityCode,
-      businessTradeCode,
-    });
-
-    if (existingActivity) {
-      // If entry already exists, update it
-      existingActivity.businessActivity = businessActivity;
-      await existingActivity.save();
-      return res.status(200).json(existingActivity);
-    } else {
-      // If the Business Activity doesn't exist, create a new one
-      const newActivity = await BusinessActivity.create({
-        businessActivity,
-        businessActivityCode,
-        businessTradeCode,
+    if (!businessActivity || !businessActivityCode) {
+      return res.status(400).json({
+        error: "Business Activity and Business Activity Code are required",
       });
-      return res.status(201).json(newActivity);
     }
+
+    if (businessActivity.length !== businessActivityCode.length) {
+      return res.status(400).json({
+        error:
+          "Business Activity and Business Activity Code arrays must have the same length",
+      });
+    }
+
+    const createdEntries = [];
+    for (let i = 0; i < businessActivity.length; i++) {
+      const businessActivityItem = businessActivity[i];
+      const businessActivityCodeItem = businessActivityCode[i];
+      const businessTradeCodeItem = businessTradeCode[i];
+
+      const regex = new RegExp(`^${businessActivityItem}$`, "i");
+      let BusinessActivityAvailable = await BusinessActivity.findOne({
+        businessActivity: regex,
+      });
+
+      if (BusinessActivityAvailable) {
+        // If UBP entry already exists, update it
+        BusinessActivityAvailable.businessActivity = businessActivityItem;
+        BusinessActivityAvailable.businessActivityCode =
+          businessActivityCodeItem;
+        BusinessActivityAvailable.businessTradeCode = businessTradeCodeItem;
+        await BusinessActivityAvailable.save();
+        createdEntries.push(BusinessActivityAvailable);
+      } else {
+        // If the Business Activity doesn't exist, create a new one
+        const businessActivities = {
+          businessActivity: businessActivityItem,
+          businessActivityCode: businessActivityCodeItem,
+          businessTradeCode: businessTradeCodeItem,
+        };
+        const createdEntry = await BusinessActivity.create(businessActivities);
+        createdEntries.push(createdEntry);
+      }
+    }
+    return res.status(201).json({
+      message: "Business Activities added successfully",
+      createdEntries,
+    });
   } catch (error) {
     console.error("Error in uploadBusinessActivities:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // @desc Upload FinanceAct
 // @route GET /api/naics/uploadFinanceAct
