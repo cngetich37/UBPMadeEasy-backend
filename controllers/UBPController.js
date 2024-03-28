@@ -590,43 +590,60 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
     const { businessActivity, businessActivityCode, businessTradeCode } = req.body;
 
-    if (!businessActivity || !businessActivityCode || businessTradeCode === undefined) {
+    // Check if businessActivity is a string or an array of strings
+    if (!Array.isArray(businessActivity) && typeof businessActivity !== 'string') {
       return res.status(400).json({
-        error: "Business Activity, Business Activity Code, and Business Trade Code are required",
+        error: "Business Activity must be a string or an array of strings",
       });
     }
 
-    // Convert businessActivity to lowercase if it's a string
-    const normalizedBusinessActivity = typeof businessActivity === 'string' ? businessActivity.toLowerCase() : businessActivity;
+    const businessActivities = Array.isArray(businessActivity) ? businessActivity : [businessActivity];
 
-    // Check if business activity already exists
-    let existingActivity = await BusinessActivity.findOne({
-      businessActivity: normalizedBusinessActivity, // Use the normalized value
-    });
-
-    if (existingActivity) {
-      if (existingActivity.businessTradeCode !== businessTradeCode) {
+    // Validate each businessActivity
+    for (const activity of businessActivities) {
+      if (typeof activity !== 'string') {
         return res.status(400).json({
-          error: `Business Activity "${businessActivity}" is already defined with a different Business Trade Code`,
+          error: "Each business activity must be a string",
         });
       }
-      return res.status(200).json({
-        message: "Business Activity already exists",
-        existingActivity,
+    }
+
+    if (!businessActivityCode || businessTradeCode === undefined) {
+      return res.status(400).json({
+        error: "Business Activity Code and Business Trade Code are required",
       });
     }
 
-    // Create new business activity if it doesn't exist
-    const newBusinessActivity = {
-      businessActivity: normalizedBusinessActivity, // Use the normalized value
-      businessActivityCode,
-      businessTradeCode,
-    };
-    const createdEntry = await BusinessActivity.create(newBusinessActivity);
+    const createdEntries = [];
+
+    for (const activity of businessActivities) {
+      const normalizedBusinessActivity = activity.toLowerCase();
+
+      const existingActivity = await BusinessActivity.findOne({
+        businessActivity: normalizedBusinessActivity,
+      });
+
+      if (existingActivity) {
+        if (existingActivity.businessTradeCode !== businessTradeCode) {
+          return res.status(400).json({
+            error: `Business Activity "${activity}" is already defined with a different Business Trade Code`,
+          });
+        }
+        createdEntries.push(existingActivity);
+      } else {
+        const newBusinessActivity = {
+          businessActivity: normalizedBusinessActivity,
+          businessActivityCode,
+          businessTradeCode,
+        };
+        const createdEntry = await BusinessActivity.create(newBusinessActivity);
+        createdEntries.push(createdEntry);
+      }
+    }
 
     return res.status(201).json({
-      message: "Business Activity added successfully",
-      createdEntry,
+      message: "Business Activities added successfully",
+      createdEntries,
     });
   } catch (error) {
     console.error("Error in uploadBusinessActivities:", error);
