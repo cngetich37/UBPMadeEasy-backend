@@ -588,59 +588,52 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
-    const { businessActivity, businessActivityCode, businessTradeCode } = req.body;
+    const { businessActivity, businessActivityCode, businessTradeCode } =
+      req.body;
 
-    // Check if businessActivity is a string or an array of strings
-    if (!Array.isArray(businessActivity) && typeof businessActivity !== 'string') {
+    if (!businessActivity || !businessActivityCode) {
       return res.status(400).json({
-        error: "Business Activity must be a string or an array of strings",
+        error: "Business Activity and Business Activity Code are required",
       });
     }
 
-    const businessActivities = Array.isArray(businessActivity) ? businessActivity : [businessActivity];
-
-    // Validate each businessActivity
-    for (const activity of businessActivities) {
-      if (typeof activity !== 'string') {
-        return res.status(400).json({
-          error: "Each business activity must be a string",
-        });
-      }
-    }
-
-    if (!businessActivityCode || businessTradeCode === undefined) {
+    if (businessActivity.length !== businessActivityCode.length) {
       return res.status(400).json({
-        error: "Business Activity Code and Business Trade Code are required",
+        error:
+          "Business Activity and Business Activity Code arrays must have the same length",
       });
     }
 
     const createdEntries = [];
+    for (let i = 0; i < businessActivity.length; i++) {
+      const businessActivityItem = businessActivity[i];
+      const businessActivityCodeItem = businessActivityCode[i];
+      const businessTradeCodeItem = businessTradeCode[i];
 
-    for (const activity of businessActivities) {
-      const normalizedBusinessActivity = activity.toLowerCase();
-
-      const existingActivity = await BusinessActivity.findOne({
-        businessActivity: normalizedBusinessActivity,
+      const regex = new RegExp(`^${businessActivityItem}$`, "i");
+      let BusinessActivityAvailable = await BusinessActivity.findOne({
+        businessActivity: regex,
       });
 
-      if (existingActivity) {
-        if (existingActivity.businessTradeCode !== businessTradeCode) {
-          return res.status(400).json({
-            error: `Business Activity "${activity}" is already defined with a different Business Trade Code`,
-          });
-        }
-        createdEntries.push(existingActivity);
+      if (BusinessActivityAvailable) {
+        // If UBP entry already exists, update it
+        BusinessActivityAvailable.businessActivity = businessActivityItem;
+        BusinessActivityAvailable.businessActivityCode =
+          businessActivityCodeItem;
+        BusinessActivityAvailable.businessTradeCode = businessTradeCodeItem;
+        await BusinessActivityAvailable.save();
+        createdEntries.push(BusinessActivityAvailable);
       } else {
-        const newBusinessActivity = {
-          businessActivity: normalizedBusinessActivity,
-          businessActivityCode,
-          businessTradeCode,
+        // If the Business Activity doesn't exist, create a new one
+        const businessActivities = {
+          businessActivity: businessActivityItem,
+          businessActivityCode: businessActivityCodeItem,
+          businessTradeCode: businessTradeCodeItem,
         };
-        const createdEntry = await BusinessActivity.create(newBusinessActivity);
+        const createdEntry = await BusinessActivity.create(businessActivities);
         createdEntries.push(createdEntry);
       }
     }
-
     return res.status(201).json({
       message: "Business Activities added successfully",
       createdEntries,
