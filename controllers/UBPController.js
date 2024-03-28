@@ -597,10 +597,10 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
       });
     }
 
-    if (businessActivity.length !== businessActivityCode.length) {
+    if (businessActivity.length !== businessActivityCode.length || businessActivity.length !== businessTradeCode.length) {
       return res.status(400).json({
         error:
-          "Business Activity and Business Activity Code arrays must have the same length",
+          "Business Activity, Business Activity Code, and Business Trade Code arrays must have the same length",
       });
     }
 
@@ -610,30 +610,39 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
       const businessActivityCodeItem = businessActivityCode[i];
       const businessTradeCodeItem = businessTradeCode[i];
 
-      const regex = new RegExp(`^${businessActivityItem}$`, "i");
-      let BusinessActivityAvailable = await BusinessActivity.findOne({
-        businessActivity: regex,
-      });
+      try {
+        const regex = new RegExp(`^${businessActivityItem}$`, "i");
+        let BusinessActivityAvailable = await BusinessActivity.findOne({
+          businessActivity: regex,
+        });
 
-      if (BusinessActivityAvailable) {
-        // If UBP entry already exists, update it
-        BusinessActivityAvailable.businessActivity = businessActivityItem;
-        BusinessActivityAvailable.businessActivityCode =
-          businessActivityCodeItem;
-        BusinessActivityAvailable.businessTradeCode = businessTradeCodeItem;
-        await BusinessActivityAvailable.save();
-        createdEntries.push(BusinessActivityAvailable);
-      } else {
-        // If the Business Activity doesn't exist, create a new one
-        const businessActivities = {
-          businessActivity: businessActivityItem,
-          businessActivityCode: businessActivityCodeItem,
-          businessTradeCode: businessTradeCodeItem,
-        };
-        const createdEntry = await BusinessActivity.create(businessActivities);
-        createdEntries.push(createdEntry);
+        if (BusinessActivityAvailable) {
+          // If UBP entry already exists, update it
+          BusinessActivityAvailable.businessActivity = businessActivityItem;
+          BusinessActivityAvailable.businessActivityCode =
+            businessActivityCodeItem;
+          BusinessActivityAvailable.businessTradeCode = businessTradeCodeItem;
+          await BusinessActivityAvailable.save();
+          createdEntries.push(BusinessActivityAvailable);
+        } else {
+          // If the Business Activity doesn't exist, create a new one
+          const businessActivities = {
+            businessActivity: businessActivityItem,
+            businessActivityCode: businessActivityCodeItem,
+            businessTradeCode: businessTradeCodeItem,
+          };
+          const createdEntry = await BusinessActivity.create(businessActivities);
+          createdEntries.push(createdEntry);
+        }
+      } catch (error) {
+        console.error("Error processing entry:", error);
+        // Log the failed entry for debugging purposes
+        console.log("Failed entry:", businessActivityItem, businessActivityCodeItem, businessTradeCodeItem);
+        // Return error response for the failed entry
+        createdEntries.push({ error: `Failed to process entry: ${error.message}` });
       }
     }
+
     return res.status(201).json({
       message: "Business Activities added successfully",
       createdEntries,
