@@ -588,58 +588,42 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
-    const { businessActivities } = req.body;
+    const { businessActivity, businessActivityCode, businessTradeCode } =
+      req.body;
 
-    if (!businessActivities || !Array.isArray(businessActivities)) {
-      return res.status(400).json({
-        error: "Business Activities array is required",
-      });
+    if (!businessActivity || !businessActivityCode || !businessTradeCode) {
+      res.status(400);
+      throw new Error(
+        "Business Activity, Business Activity Code, and Business Trade Code are required"
+      );
     }
 
-    const createdEntries = [];
+    const regex = new RegExp(`^${businessActivity}$`, "i");
+    let existingActivity = await BusinessActivity.findOne({
+      businessActivity: regex,
+      businessActivityCode,
+      businessTradeCode,
+    });
 
-    for (const activity of businessActivities) {
-      const { businessActivity, businessActivityCode, businessTradeCode } = activity;
-
-      if (!businessActivity || !businessActivityCode || !businessTradeCode) {
-        return res.status(400).json({
-          error: "Business Activity, Business Activity Code, and Business Trade Code are required for each activity",
-        });
-      }
-
-      const regex = new RegExp(`^${businessActivity}$`, "i");
-      let existingActivity = await BusinessActivity.findOne({
-        businessActivity: regex,
+    if (existingActivity) {
+      // If entry already exists, update it
+      existingActivity.businessActivity = businessActivity;
+      await existingActivity.save();
+      return res.status(200).json(existingActivity);
+    } else {
+      // If the Business Activity doesn't exist, create a new one
+      const newActivity = await BusinessActivity.create({
+        businessActivity,
         businessActivityCode,
         businessTradeCode,
       });
-
-      if (existingActivity) {
-        // If entry already exists, update it
-        existingActivity.businessActivity = businessActivity;
-        await existingActivity.save();
-        createdEntries.push(existingActivity);
-      } else {
-        // If the Business Activity doesn't exist, create a new one
-        const newActivity = await BusinessActivity.create({
-          businessActivity,
-          businessActivityCode,
-          businessTradeCode,
-        });
-        createdEntries.push(newActivity);
-      }
+      return res.status(201).json(newActivity);
     }
-
-    return res.status(201).json({
-      message: "Business Activities added successfully",
-      createdEntries,
-    });
   } catch (error) {
     console.error("Error in uploadBusinessActivities:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 // @desc Upload FinanceAct
 // @route GET /api/naics/uploadFinanceAct
