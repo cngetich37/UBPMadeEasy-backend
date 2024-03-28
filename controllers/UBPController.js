@@ -588,57 +588,47 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
-    const { businessActivities } = req.body;
+    const { businessActivity, businessActivityCode, businessTradeCode } =
+      req.body; // Corrected variable names
 
     if (
-      !businessActivities ||
-      !Array.isArray(businessActivities) ||
-      businessActivities.length === 0
+      !businessActivity ||
+      !businessActivityCode ||
+      businessTradeCode === undefined
     ) {
       return res.status(400).json({
-        error: "Business activities array is required and must not be empty",
+        error:
+          "Business Activity, Business Activity Code, and Business Trade Code are required",
       });
     }
 
-    const createdEntries = [];
+    const regex = new RegExp(`^${businessActivity}$`, "i");
+    let existingActivity = await BusinessActivity.findOne({
+      businessActivity: regex,
+    });
 
-    for (const activity of businessActivities) {
-      const { businessActivity, businessActivityCode, businessTradeCode } =
-        activity;
-
-      if (!businessActivity || !businessActivityCode || !businessTradeCode) {
+    if (existingActivity) {
+      if (existingActivity.businessTradeCode !== businessTradeCode) {
         return res.status(400).json({
-          error:
-            "Business Activity, Business Activity Code, and Business Trade Code are required for each entry",
+          error: `Business Activity "${businessActivity}" is already defined with a different Business Trade Code`,
         });
       }
-
-      const regex = new RegExp(`^${businessActivity}$`, "i");
-      let existingActivity = await BusinessActivity.findOne({
-        businessActivity: regex,
+      return res.status(200).json({
+        message: "Business Activity already exists",
+        existingActivity,
       });
-
-      if (existingActivity) {
-        if (existingActivity.businessTradeCode !== businessTradeCode) {
-          return res.status(400).json({
-            error: `Business Activity "${businessActivity}" is already defined with a different Business Trade Code`,
-          });
-        }
-        createdEntries.push(existingActivity);
-      } else {
-        const newBusinessActivity = {
-          businessActivity,
-          businessActivityCode,
-          businessTradeCode,
-        };
-        const createdEntry = await BusinessActivity.create(newBusinessActivity);
-        createdEntries.push(createdEntry);
-      }
     }
 
+    const newBusinessActivity = {
+      businessActivity,
+      businessActivityCode,
+      businessTradeCode,
+    };
+    const createdEntry = await BusinessActivity.create(newBusinessActivity);
+
     return res.status(201).json({
-      message: "Business Activities added successfully",
-      createdEntries,
+      message: "Business Activity added successfully",
+      createdEntry,
     });
   } catch (error) {
     console.error("Error in uploadBusinessActivities:", error);
