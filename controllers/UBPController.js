@@ -596,9 +596,12 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
       });
     }
 
+    // Convert businessActivity to lowercase if it's a string
+    const normalizedBusinessActivity = typeof businessActivity === 'string' ? businessActivity.toLowerCase() : businessActivity;
+
     // Check if business activity already exists
     let existingActivity = await BusinessActivity.findOne({
-      businessActivity: businessActivity.toLowerCase(), // Assuming case-insensitive comparison
+      businessActivity: normalizedBusinessActivity, // Use the normalized value
     });
 
     if (existingActivity) {
@@ -615,7 +618,7 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
 
     // Create new business activity if it doesn't exist
     const newBusinessActivity = {
-      businessActivity: businessActivity.toLowerCase(), // Assuming case-insensitive comparison
+      businessActivity: normalizedBusinessActivity, // Use the normalized value
       businessActivityCode,
       businessTradeCode,
     };
@@ -630,6 +633,7 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // @desc Upload FinanceAct
 // @route GET /api/naics/uploadFinanceAct
