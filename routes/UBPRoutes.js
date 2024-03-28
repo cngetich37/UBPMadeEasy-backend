@@ -25,7 +25,6 @@ const {
   uploadFinanceAct,
   UBPFinanceAct,
 } = require("../controllers/UBPController");
-const UBPFinancaAct_One = require("../controllers/RemoveUndefined");
 const router = express.Router();
 
 router.route("/ubpdictionary").get(getUbpDictionary);
@@ -50,7 +49,6 @@ router
 router.route("/financeact/:naicsCode").get(getNaicsCodeFinanceAct);
 router.route("/").get(UBPActivities);
 router.route("/:commonBusinessActivity").get(getUBPActivity);
-router.route("/removeUndefined").put(UBPFinancaAct_One);
 router.route("/uploadUBP").post(upload.single("file"), uploadUBP);
 router.route("/updateUBP").post(upload.single("file"), updateUBP);
 router.route("/uploadFinanceAct").post(upload.single("file"), uploadFinanceAct);

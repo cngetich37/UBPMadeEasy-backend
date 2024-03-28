@@ -34,7 +34,7 @@ const UBPFinanceAct = asyncHandler(async (req, res) => {
       for (let key in obj) {
         if (obj[key] === undefined) {
           obj[key] = "0";
-        } else if (typeof obj[key] === 'object') {
+        } else if (typeof obj[key] === "object") {
           replaceUndefined(obj[key]);
         }
       }
@@ -42,19 +42,9 @@ const UBPFinanceAct = asyncHandler(async (req, res) => {
     };
 
     // Filter out undefined strings and replace them with "0"
-    const filteredFinance = ubpFinance.map(item => {
+    const filteredFinance = ubpFinance.map((item) => {
       return replaceUndefined(item.toObject());
     });
-
-    // Modify the "foodHygiene" field to "0" if it's still "undefined"
-    filteredFinance.forEach(item => {
-      if (item.foodHygiene === undefined) {
-        console.log('Found undefined value for foodHygiene, setting to "0"');
-        item.foodHygiene = "0";
-      }
-    });
-
-    console.log('Filtered finance data:', filteredFinance);
 
     res.status(200).json(filteredFinance);
   } catch (error) {
@@ -63,7 +53,6 @@ const UBPFinanceAct = asyncHandler(async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 });
-
 
 // @desc Get UBP Business Categories
 // @route GET /api/naics/businesscategories
@@ -599,52 +588,62 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
-    const { businessActivity, businessActivityCode, businessTradeCode } =
-      req.body;
+    const { businessActivities } = req.body;
 
-    if (!businessActivity || !businessActivityCode) {
+    if (
+      !businessActivities ||
+      !Array.isArray(businessActivities) ||
+      businessActivities.length === 0
+    ) {
       return res.status(400).json({
-        error: "Business Activity and Business Activity Code are required",
-      });
-    }
-
-    if (businessActivity.length !== businessActivityCode.length) {
-      return res.status(400).json({
-        error:
-          "Business Activity and Business Activity Code arrays must have the same length",
+        error: "Business activities array is required and must not be empty",
       });
     }
 
     const createdEntries = [];
-    for (let i = 0; i < businessActivity.length; i++) {
-      const businessActivityItem = businessActivity[i];
-      const businessActivityCodeItem = businessActivityCode[i];
-      const businessTradeCodeItem = businessTradeCode[i];
 
-      const regex = new RegExp(`^${businessActivityItem}$`, "i");
+    for (const activity of businessActivities) {
+      const { businessActivity, businessActivityCode, businessTradeCode } =
+        activity;
+
+      if (!businessActivity || !businessActivityCode) {
+        return res.status(400).json({
+          error:
+            "Business Activity and Business Activity Code are required for each entry",
+        });
+      }
+
+      const regex = new RegExp(`^${businessActivity}$`, "i");
       let BusinessActivityAvailable = await BusinessActivity.findOne({
         businessActivity: regex,
       });
 
       if (BusinessActivityAvailable) {
-        // If UBP entry already exists, update it
-        BusinessActivityAvailable.businessActivity = businessActivityItem;
-        BusinessActivityAvailable.businessActivityCode =
-          businessActivityCodeItem;
-        BusinessActivityAvailable.businessTradeCode = businessTradeCodeItem;
-        await BusinessActivityAvailable.save();
+        // Check if the entry found in the database matches the current entry's code
+        if (
+          BusinessActivityAvailable.businessActivityCode !==
+            businessActivityCode ||
+          BusinessActivityAvailable.businessTradeCode !== businessTradeCode
+        ) {
+          return res.status(400).json({
+            error: `Business Activity "${businessActivity}" is already defined with a different code`,
+          });
+        }
+
+        // If entry already exists and codes match, no need to update
         createdEntries.push(BusinessActivityAvailable);
       } else {
-        // If the Business Activity doesn't exist, create a new one
-        const businessActivities = {
-          businessActivity: businessActivityItem,
-          businessActivityCode: businessActivityCodeItem,
-          businessTradeCode: businessTradeCodeItem,
+        // If the entry doesn't exist, create a new one
+        const newBusinessActivity = {
+          businessActivity,
+          businessActivityCode,
+          businessTradeCode,
         };
-        const createdEntry = await BusinessActivity.create(businessActivities);
+        const createdEntry = await BusinessActivity.create(newBusinessActivity);
         createdEntries.push(createdEntry);
       }
     }
+
     return res.status(201).json({
       message: "Business Activities added successfully",
       createdEntries,
@@ -654,6 +653,7 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
 // @desc Upload FinanceAct
 // @route GET /api/naics/uploadFinanceAct
 // @access public
