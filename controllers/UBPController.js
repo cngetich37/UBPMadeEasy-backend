@@ -606,34 +606,26 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
       const { businessActivity, businessActivityCode, businessTradeCode } =
         activity;
 
-      if (!businessActivity || !businessActivityCode) {
+      if (!businessActivity || !businessActivityCode || !businessTradeCode) {
         return res.status(400).json({
           error:
-            "Business Activity and Business Activity Code are required for each entry",
+            "Business Activity, Business Activity Code, and Business Trade Code are required for each entry",
         });
       }
 
       const regex = new RegExp(`^${businessActivity}$`, "i");
-      let BusinessActivityAvailable = await BusinessActivity.findOne({
+      let existingActivity = await BusinessActivity.findOne({
         businessActivity: regex,
       });
 
-      if (BusinessActivityAvailable) {
-        // Check if the entry found in the database matches the current entry's code
-        if (
-          BusinessActivityAvailable.businessActivityCode !==
-            businessActivityCode ||
-          BusinessActivityAvailable.businessTradeCode !== businessTradeCode
-        ) {
+      if (existingActivity) {
+        if (existingActivity.businessTradeCode !== businessTradeCode) {
           return res.status(400).json({
-            error: `Business Activity "${businessActivity}" is already defined with a different code`,
+            error: `Business Activity "${businessActivity}" is already defined with a different Business Trade Code`,
           });
         }
-
-        // If entry already exists and codes match, no need to update
-        createdEntries.push(BusinessActivityAvailable);
+        createdEntries.push(existingActivity);
       } else {
-        // If the entry doesn't exist, create a new one
         const newBusinessActivity = {
           businessActivity,
           businessActivityCode,
