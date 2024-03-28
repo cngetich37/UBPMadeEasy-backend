@@ -588,52 +588,48 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
-    const { businessActivity, businessActivityCode, businessTradeCode } =
-      req.body;
+    const { businessActivities } = req.body;
 
-    if (!businessActivity || !businessActivityCode) {
+    if (!businessActivities || !Array.isArray(businessActivities)) {
       return res.status(400).json({
-        error: "Business Activity and Business Activity Code are required",
-      });
-    }
-
-    if (businessActivity.length !== businessActivityCode.length) {
-      return res.status(400).json({
-        error:
-          "Business Activity and Business Activity Code arrays must have the same length",
+        error: "Business Activities array is required",
       });
     }
 
     const createdEntries = [];
-    for (let i = 0; i < businessActivity.length; i++) {
-      const businessActivityItem = businessActivity[i];
-      const businessActivityCodeItem = businessActivityCode[i];
-      const businessTradeCodeItem = businessTradeCode[i];
 
-      const regex = new RegExp(`^${businessActivityItem}$`, "i");
-      let BusinessActivityAvailable = await BusinessActivity.findOne({
+    for (const activity of businessActivities) {
+      const { businessActivity, businessActivityCode, businessTradeCode } = activity;
+
+      if (!businessActivity || !businessActivityCode || !businessTradeCode) {
+        return res.status(400).json({
+          error: "Business Activity, Business Activity Code, and Business Trade Code are required for each activity",
+        });
+      }
+
+      const regex = new RegExp(`^${businessActivity}$`, "i");
+      let existingActivity = await BusinessActivity.findOne({
         businessActivity: regex,
+        businessActivityCode,
+        businessTradeCode,
       });
 
-      if (BusinessActivityAvailable) {
-        // If UBP entry already exists, update it
-        BusinessActivityAvailable.businessActivity = businessActivityItem;
-        BusinessActivityAvailable.businessActivityCode =
-          businessActivityCodeItem;
-        BusinessActivityAvailable.businessTradeCode = businessTradeCodeItem;
-        await BusinessActivityAvailable.save();
-        createdEntries.push(BusinessActivityAvailable);
+      if (existingActivity) {
+        // If entry already exists, update it
+        existingActivity.businessActivity = businessActivity;
+        await existingActivity.save();
+        createdEntries.push(existingActivity);
       } else {
         // If the Business Activity doesn't exist, create a new one
-        const businessActivities = {
-          businessActivity: businessActivityItem,
-          businessActivityCode: businessActivityCodeItem,
-          businessTradeCode: businessTradeCodeItem,
-        };
-        const createdEntry = await BusinessActivity.create(businessActivities);
-        createdEntries.push(createdEntry);
+        const newActivity = await BusinessActivity.create({
+          businessActivity,
+          businessActivityCode,
+          businessTradeCode,
+        });
+        createdEntries.push(newActivity);
       }
     }
+
     return res.status(201).json({
       message: "Business Activities added successfully",
       createdEntries,
