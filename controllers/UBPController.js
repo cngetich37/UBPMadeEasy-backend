@@ -588,23 +588,17 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
-    const { businessActivity, businessActivityCode, businessTradeCode } =
-      req.body; // Corrected variable names
+    const { businessActivity, businessActivityCode, businessTradeCode } = req.body;
 
-    if (
-      !businessActivity ||
-      !businessActivityCode ||
-      businessTradeCode === undefined
-    ) {
+    if (!businessActivity || !businessActivityCode || businessTradeCode === undefined) {
       return res.status(400).json({
-        error:
-          "Business Activity, Business Activity Code, and Business Trade Code are required",
+        error: "Business Activity, Business Activity Code, and Business Trade Code are required",
       });
     }
 
-    const regex = new RegExp(`^${businessActivity}$`, "i");
+    // Check if business activity already exists
     let existingActivity = await BusinessActivity.findOne({
-      businessActivity: regex,
+      businessActivity: businessActivity.toLowerCase(), // Assuming case-insensitive comparison
     });
 
     if (existingActivity) {
@@ -619,8 +613,9 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
       });
     }
 
+    // Create new business activity if it doesn't exist
     const newBusinessActivity = {
-      businessActivity,
+      businessActivity: businessActivity.toLowerCase(), // Assuming case-insensitive comparison
       businessActivityCode,
       businessTradeCode,
     };
