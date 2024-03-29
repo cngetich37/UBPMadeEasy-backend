@@ -588,6 +588,8 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
+    console.log("Request body:", req.body); // Log the entire request body
+
     // Extract businessActivities array from request body
     const { businessActivities } = req.body;
 
