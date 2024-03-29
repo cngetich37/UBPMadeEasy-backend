@@ -604,39 +604,19 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
       });
     }
 
-    const createdEntries = [];
-
-    // Loop through each entry
+    // Prepare entries to be inserted into the database
+    const entriesToInsert = [];
     for (let i = 0; i < businessActivity.length; i++) {
-      const businessActivityItem = businessActivity[i];
-      const businessActivityCodeItem = businessActivityCode[i];
-      const businessTradeCodeItem = businessTradeCode[i];
-
-      try {
-        // Check if entry already exists
-        let existingEntry = await BusinessActivity.findOne({ businessActivity: businessActivityItem });
-
-        if (existingEntry) {
-          // Update existing entry
-          existingEntry.businessActivityCode = businessActivityCodeItem;
-          existingEntry.businessTradeCode = businessTradeCodeItem;
-          await existingEntry.save();
-          createdEntries.push(existingEntry);
-        } else {
-          // Create new entry
-          const newEntry = new BusinessActivity({
-            businessActivity: businessActivityItem,
-            businessActivityCode: businessActivityCodeItem,
-            businessTradeCode: businessTradeCodeItem,
-          });
-          await newEntry.save();
-          createdEntries.push(newEntry);
-        }
-      } catch (error) {
-        console.error("Error processing entry:", error);
-        createdEntries.push({ error: `Failed to process entry: ${error.message}` });
-      }
+      const entry = {
+        businessActivity: businessActivity[i],
+        businessActivityCode: businessActivityCode[i],
+        businessTradeCode: businessTradeCode[i]
+      };
+      entriesToInsert.push(entry);
     }
+
+    // Insert entries into the database
+    const createdEntries = await BusinessActivity.insertMany(entriesToInsert);
 
     return res.status(201).json({
       message: "Business Activities added successfully",
