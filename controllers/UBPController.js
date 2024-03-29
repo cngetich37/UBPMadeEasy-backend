@@ -588,57 +588,52 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
-    const { businessActivity, businessActivityCode, businessTradeCode } =
-      req.body;
+    const { businessActivity, businessActivityCode, businessTradeCode } = req.body;
 
-    if (!businessActivity || !businessActivityCode) {
+    // Check if required fields are provided
+    if (!businessActivity || !businessActivityCode || !businessTradeCode) {
       return res.status(400).json({
-        error: "Business Activity and Business Activity Code are required",
+        error: "Business Activity, Business Activity Code, and Business Trade Code are required",
       });
     }
 
+    // Check if arrays have the same length
     if (businessActivity.length !== businessActivityCode.length || businessActivity.length !== businessTradeCode.length) {
       return res.status(400).json({
-        error:
-          "Business Activity, Business Activity Code, and Business Trade Code arrays must have the same length",
+        error: "Business Activity, Business Activity Code, and Business Trade Code arrays must have the same length",
       });
     }
 
     const createdEntries = [];
+
+    // Loop through each entry
     for (let i = 0; i < businessActivity.length; i++) {
       const businessActivityItem = businessActivity[i];
       const businessActivityCodeItem = businessActivityCode[i];
       const businessTradeCodeItem = businessTradeCode[i];
 
       try {
-        const regex = new RegExp(`^${businessActivityItem}$`, "i");
-        let BusinessActivityAvailable = await BusinessActivity.findOne({
-          businessActivity: regex,
-        });
+        // Check if entry already exists
+        let existingEntry = await BusinessActivity.findOne({ businessActivity: businessActivityItem });
 
-        if (BusinessActivityAvailable) {
-          // If UBP entry already exists, update it
-          BusinessActivityAvailable.businessActivity = businessActivityItem;
-          BusinessActivityAvailable.businessActivityCode =
-            businessActivityCodeItem;
-          BusinessActivityAvailable.businessTradeCode = businessTradeCodeItem;
-          await BusinessActivityAvailable.save();
-          createdEntries.push(BusinessActivityAvailable);
+        if (existingEntry) {
+          // Update existing entry
+          existingEntry.businessActivityCode = businessActivityCodeItem;
+          existingEntry.businessTradeCode = businessTradeCodeItem;
+          await existingEntry.save();
+          createdEntries.push(existingEntry);
         } else {
-          // If the Business Activity doesn't exist, create a new one
-          const businessActivities = {
+          // Create new entry
+          const newEntry = new BusinessActivity({
             businessActivity: businessActivityItem,
             businessActivityCode: businessActivityCodeItem,
             businessTradeCode: businessTradeCodeItem,
-          };
-          const createdEntry = await BusinessActivity.create(businessActivities);
-          createdEntries.push(createdEntry);
+          });
+          await newEntry.save();
+          createdEntries.push(newEntry);
         }
       } catch (error) {
         console.error("Error processing entry:", error);
-        // Log the failed entry for debugging purposes
-        console.log("Failed entry:", businessActivityItem, businessActivityCodeItem, businessTradeCodeItem);
-        // Return error response for the failed entry
         createdEntries.push({ error: `Failed to process entry: ${error.message}` });
       }
     }
