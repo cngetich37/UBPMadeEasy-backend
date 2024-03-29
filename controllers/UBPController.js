@@ -588,8 +588,9 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
+    
     const { businessActivities } = req.body;
-
+    console.log("Request body:", req.body);
     // Check if required fields are provided
     if (!businessActivities || !Array.isArray(businessActivities)) {
       return res.status(400).json({
