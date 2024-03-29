@@ -588,34 +588,38 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
-    
-    const { businessActivities } = req.body;
-    console.log("Request body:", req.body);
-    // Check if required fields are provided
-    if (!businessActivities || !Array.isArray(businessActivities)) {
+    // Check if businessActivities array is present in the request body
+    if (!req.body.hasOwnProperty('businessActivities')) {
       return res.status(400).json({
-        error: "Business activities array is required",
+        error: "Business activities array is missing in the request body",
       });
     }
 
-    // Prepare entries to be inserted or updated in the database
-    const bulkOperations = businessActivities.map(activity => ({
-      updateOne: {
-        filter: {
-          businessActivityCode: activity.businessActivityCode,
-        },
-        update: activity,
-        upsert: true,
-      },
-    }));
+    const businessActivities = req.body.businessActivities;
 
-    // Execute bulk operations to update or insert entries into the database
-    const result = await BusinessActivity.bulkWrite(bulkOperations);
+    // Check if businessActivities is an array
+    if (!Array.isArray(businessActivities)) {
+      return res.status(400).json({
+        error: "Business activities must be provided as an array",
+      });
+    }
 
-    return res.status(201).json({
-      message: "Business activities added successfully",
-      result,
-    });
+    // Check if businessActivities array is empty
+    if (businessActivities.length === 0) {
+      return res.status(400).json({
+        error: "Business activities array is empty",
+      });
+    }
+
+    // Check if each element in businessActivities is an object
+    if (!businessActivities.every(activity => typeof activity === 'object')) {
+      return res.status(400).json({
+        error: "Each element in the business activities array must be an object",
+      });
+    }
+
+    // Rest of your code...
+
   } catch (error) {
     console.error("Error in uploadBusinessActivities:", error);
     return res.status(500).json({ error: "Internal server error" });
