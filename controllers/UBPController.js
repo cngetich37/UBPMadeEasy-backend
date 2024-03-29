@@ -588,51 +588,31 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
-    const { businessActivity, businessActivityCode, businessTradeCode } = req.body;
+    const { businessActivities } = req.body;
 
     // Check if required fields are provided
-    if (!businessActivity || !businessActivityCode || !businessTradeCode) {
+    if (!businessActivities || !Array.isArray(businessActivities)) {
       return res.status(400).json({
-        error: "Business Activity, Business Activity Code, and Business Trade Code are required",
-      });
-    }
-
-    // Check if arrays have the same length
-    if (businessActivity.length !== businessActivityCode.length || businessActivity.length !== businessTradeCode.length) {
-      return res.status(400).json({
-        error: "Business Activity, Business Activity Code, and Business Trade Code arrays must have the same length",
+        error: "Business activities array is required",
       });
     }
 
     // Prepare entries to be inserted or updated in the database
-    const bulkOperations = [];
-    for (let i = 0; i < businessActivity.length; i++) {
-      const filter = {
-        businessActivity: businessActivity[i],
-        businessActivityCode: businessActivityCode[i],
-        businessTradeCode: businessTradeCode[i]
-      };
-
-      const update = {
-        businessActivity: businessActivity[i],
-        businessActivityCode: businessActivityCode[i],
-        businessTradeCode: businessTradeCode[i]
-      };
-
-      bulkOperations.push({
-        updateOne: {
-          filter,
-          update,
-          upsert: true
-        }
-      });
-    }
+    const bulkOperations = businessActivities.map(activity => ({
+      updateOne: {
+        filter: {
+          businessActivityCode: activity.businessActivityCode,
+        },
+        update: activity,
+        upsert: true,
+      },
+    }));
 
     // Execute bulk operations to update or insert entries into the database
     const result = await BusinessActivity.bulkWrite(bulkOperations);
 
     return res.status(201).json({
-      message: "Business Activities added successfully",
+      message: "Business activities added successfully",
       result,
     });
   } catch (error) {
@@ -640,6 +620,7 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 
 
