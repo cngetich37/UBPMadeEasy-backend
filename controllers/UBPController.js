@@ -604,29 +604,43 @@ const uploadBusinessActivities = asyncHandler(async (req, res) => {
       });
     }
 
-    // Prepare entries to be inserted into the database
-    const entriesToInsert = [];
+    // Prepare entries to be inserted or updated in the database
+    const bulkOperations = [];
     for (let i = 0; i < businessActivity.length; i++) {
-      const entry = {
+      const filter = {
         businessActivity: businessActivity[i],
         businessActivityCode: businessActivityCode[i],
         businessTradeCode: businessTradeCode[i]
       };
-      entriesToInsert.push(entry);
+
+      const update = {
+        businessActivity: businessActivity[i],
+        businessActivityCode: businessActivityCode[i],
+        businessTradeCode: businessTradeCode[i]
+      };
+
+      bulkOperations.push({
+        updateOne: {
+          filter,
+          update,
+          upsert: true
+        }
+      });
     }
 
-    // Insert entries into the database
-    const createdEntries = await BusinessActivity.insertMany(entriesToInsert);
+    // Execute bulk operations to update or insert entries into the database
+    const result = await BusinessActivity.bulkWrite(bulkOperations);
 
     return res.status(201).json({
       message: "Business Activities added successfully",
-      createdEntries,
+      result,
     });
   } catch (error) {
     console.error("Error in uploadBusinessActivities:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 
 // @desc Upload FinanceAct
