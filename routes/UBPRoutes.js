@@ -58,7 +58,6 @@ router
 router
   .route("/uploadBusinessSubCategories")
   .post(upload.single("file"), uploadBusinessSubCategories);
-router
-  .route("/uploadBusinessActivities")
-  .post(upload.single("file"), uploadBusinessActivities);
+router.route("/uploadBusinessActivities").post(uploadBusinessActivities);
+
 module.exports = router;
