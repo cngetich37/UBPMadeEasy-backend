@@ -14,6 +14,7 @@ const businessActivitySchema = mongoose.Schema(
       type: String,
       required: [true, "Please add the business trade code"],
     },
+    financeActs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'FinanceAct' }]
   },
   {
     timestamps: true,

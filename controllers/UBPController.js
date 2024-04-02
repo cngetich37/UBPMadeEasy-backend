@@ -778,14 +778,27 @@ const getUBPBusinessActivityCode = asyncHandler(async (req, res) => {
 
     const ubpBusinessActivity = await BusinessActivity.findOne({
       businessActivityCode: regex,
-    });
+    }).exec();
 
     console.log("Business Activity found:", ubpBusinessActivity);
 
     if (!ubpBusinessActivity) {
       res.status(404).json({ error: "Business Activity not found!" });
+      return; // Exit the function early
+    }
+
+    const financeActs = await FinanceAct.find({ naicsCode: ubpBusinessActivity.businessTradeCode });
+
+    console.log("Finance Acts found:", financeActs);
+
+    if (!financeActs) {
+      res.status(404).json({ error: "Finance Acts not found!" });
     } else {
-      res.status(200).json(ubpBusinessActivity);
+      const response = {
+        ...ubpBusinessActivity.toObject(),
+        financeActs: financeActs.map(financeAct => financeAct.toObject())
+      };
+      res.status(200).json(response);
     }
   } catch (error) {
     console.error("Error:", error);
