@@ -17,7 +17,7 @@ const createAdvert = asyncHandler(async (req, res) => {
     firstTenSquareMetres,
     extraSquareMetres,
     perEachperYear,
-    licenseFee
+    licenseFee,
   } = req.body;
 
   console.log("Request Body:", req.body);
@@ -33,7 +33,7 @@ const createAdvert = asyncHandler(async (req, res) => {
     !firstSquareMetres ||
     !firstTenSquareMetres ||
     !extraSquareMetres ||
-    !perEachperYear||
+    !perEachperYear ||
     !licenseFee
   ) {
     console.log("Validation Failed:", {
@@ -47,7 +47,7 @@ const createAdvert = asyncHandler(async (req, res) => {
       firstTenSquareMetres,
       extraSquareMetres,
       perEachperYear,
-      licenseFee
+      licenseFee,
     });
 
     res.status(400);
@@ -76,4 +76,37 @@ const createAdvert = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { createAdvert };
+// @desc Get a UBP Activity by Common Business Activity
+// @route GET /api/advert/:advertType
+// @access public
+const getAdvertType = asyncHandler(async (req, res) => {
+  const { advertType } = req.params;
+
+  // Create regular expressions to match both singular and plural forms
+  const singularRegex = new RegExp(`^${advertType}$`, "i");
+  const pluralRegex = new RegExp(`^${advertType}s?$`, "i");
+
+  // Create text search regex for specific patterns
+  const textSearchRegex = new RegExp(
+    `${advertType.replace(/\(/g, "\\(").replace(/\)/g, "\\)")}`,
+    "i"
+  );
+
+  // Search for both singular, plural forms, and text search
+  const advertActivity = await Advert.findOne({
+    $or: [
+      { advertType: singularRegex },
+      { advertType: pluralRegex },
+      { advertType: textSearchRegex },
+    ],
+  });
+
+  if (!advertActivity) {
+    res.status(404);
+    throw new Error("Advert Type not found");
+  } else {
+    res.status(200).json(advertActivity);
+  }
+});
+
+module.exports = { createAdvert, getAdvertType };
