@@ -109,4 +109,22 @@ const getAdvertType = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { createAdvert, getAdvertType };
+// @desc Get the Common Business Activities
+// @route GET /api/advert
+// @access public
+const getAdvertDictionary = asyncHandler(async (req, res) => {
+  try {
+    //UBP is a model representing suggestions, modify the query accordingly
+    const advertDictionary = await Advert.find(
+      {},
+      { advertType: 1, _id: 0 }
+    );
+
+    res.status(200).json(advertDictionary);
+  } catch (error) {
+    res.status(500);
+    throw new Error("Server Error");
+  }
+});
+
+module.exports = { createAdvert, getAdvertType,getAdvertDictionary };
