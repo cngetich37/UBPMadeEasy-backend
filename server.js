@@ -13,6 +13,7 @@ app.use(express.json());
 app.use("/api/naics", require("./routes/UBPRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/advert", require("./routes/AdvertRoutes"));
+app.use("/api/contact", require("./routes/ContactRoutes"));
 app.use(errorHandler);
 app.listen(port, () => {
   console.log(`Server is running on ${port}`);
