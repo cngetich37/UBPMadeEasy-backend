@@ -163,7 +163,6 @@ Welcome to the Unified Business Permit API documentation. This API provides endp
 cd <project_directory>
 npm install
 
-## Start the server:
 
 ```bash
 npm run dev
