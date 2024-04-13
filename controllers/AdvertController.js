@@ -109,12 +109,12 @@ const getAdvertType = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc Get the Common Business Activities
+// @desc Get the Common advert types
 // @route GET /api/advert
 // @access public
 const getAdvertDictionary = asyncHandler(async (req, res) => {
   try {
-    //UBP is a model representing suggestions, modify the query accordingly
+    //Advert is a model representing suggestions, modify the query accordingly
     const advertDictionary = await Advert.find(
       {},
       { advertType: 1, _id: 0 }
