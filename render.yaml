@@ -1,0 +1,24 @@
+# Exported from Render on 2024-05-01T13:34:36Z
+services:
+- type: web
+  name: UBPMadeEasy-backend
+  runtime: node
+  repo: https://github.com/cngetich37/UBPMadeEasy-backend
+  plan: starter
+  envVars:
+  - key: EMAIL_SECRET
+    sync: false
+  - key: EMAIL_USER
+    sync: false
+  - key: ACCESS_TOKEN_SECRET
+    sync: false
+  - key: PORT
+    sync: false
+  - key: CONNECTION_STRING
+    sync: false
+  - key: .env
+    sync: false
+  region: oregon
+  buildCommand: npm install
+  startCommand: node server.js
+version: "1"
