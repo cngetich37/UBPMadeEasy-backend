@@ -135,7 +135,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   );
 
   // Create a password reset link with the token
-  const resetPasswordLink = `https://ubpmeadmin.netlify.app/reset-password/${token}`;
+  const resetPasswordLink = `https://ubpadmace.cnetechafrica.org/reset-password/${token}`;
 
   // Send email with the password reset link
   const mailOptions = {
