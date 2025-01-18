@@ -191,10 +191,43 @@ const resetPassword = asyncHandler(async (req, res) => {
   );
   res.status(200).json({ message: "Password reset successful" });
 });
+
+// Contact form submission handler
+const sendEmail = asyncHandler(async (req, res) => {
+  const { name, email, message } = req.body;
+
+  // Validate the request body
+  if (!name || !email || !message) {
+    res.status(400);
+    throw new Error("All fields are mandatory!");
+  }
+
+  // Set up mail options for sending the contact form email
+  const mailOptions = {
+    from: email, // Sender's email address
+    to: "ubpmadeeasy@gmail.com", // Recipient's email address
+    subject: `New Message from ${name}`, // Subject of the email
+    html: `
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Message:</strong> ${message}</p>
+    `, // HTML content of the email
+  };
+
+  // Send the email using Nodemailer
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      return res.status(500).json({ message: "Error sending email!" });
+    }
+    console.log("Email sent: " + info.response);
+    res.status(200).json({ message: "Message sent successfully!" });
+  });
+});
 module.exports = {
   registerUser,
   loginUser,
   currentUser,
   forgotPassword,
   resetPassword,
+  sendEmail
 };
