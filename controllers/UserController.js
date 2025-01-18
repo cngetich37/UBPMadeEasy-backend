@@ -204,13 +204,14 @@ const sendEmail = asyncHandler(async (req, res) => {
 
   // Set up mail options for sending the contact form email
   const mailOptions = {
-    from: email, // Sender's email address
-    to: "ubpmadeeasy@gmail.com", // Recipient's email address
-    subject: `New Message from ${name}`, // Subject of the email
+    from: process.env.EMAIL_USER, // Your email address
+    to: email, // Sender's email address (the one provided in the form)
+    subject: `We received your message, ${name}!`, // Subject of the email
     html: `
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Message:</strong> ${message}</p>
+      <p>Dear ${name},</p>
+      <p>Thank you for reaching out! We’ve received your message and will get back to you soon.</p>
+      <p><strong>Your message:</strong> ${message}</p>
+      <p>Best regards,<br />UBP Made Easy Team</p>
     `, // HTML content of the email
   };
 
