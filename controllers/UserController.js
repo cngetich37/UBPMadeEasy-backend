@@ -206,12 +206,14 @@ const sendEmail = asyncHandler(async (req, res) => {
   const mailOptions = {
     from: process.env.EMAIL_USER, // Your email address
     to: email, // Sender's email address (the one provided in the form)
-    subject: `We received your message, ${name}!`, // Subject of the email
+    subject: `UBP Made Easy – Thank You for Your Feedback!`, // Subject of the email
     html: `
       <p>Dear ${name},</p>
-      <p>Thank you for reaching out! We’ve received your message and will get back to you soon.</p>
+      <p>Thank you for contacting UBP Made Easy! We appreciate you reaching out to us.</p>
+      <p>We have received your message and are currently reviewing it. We will be in touch shortly with a response.</p>
+      <p>In the meantime, please don't hesitate to reach out if you have any further questions.</p>
       <p><strong>Your message:</strong> ${message}</p>
-      <p>Best regards,<br />UBP Made Easy Team</p>
+      <p>Sincerely,<br />UBP Made Easy Team</p>
     `, // HTML content of the email
   };
 
