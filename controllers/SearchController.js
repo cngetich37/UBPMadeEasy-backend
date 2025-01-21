@@ -17,9 +17,9 @@ const connectToMongo = async () => {
   try {
     await client.connect();
     isMongoConnected = true;
-    console.log("Connected to MongoDB Atlas");
+    // console.log("Connected to MongoDB Atlas");
   } catch (error) {
-    console.error("MongoDB connection failed:", error);
+    // console.error("MongoDB connection failed:", error);
     throw new Error("Failed to connect to MongoDB Atlas");
   }
 };

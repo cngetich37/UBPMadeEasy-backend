@@ -149,7 +149,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
     if (error) {
       return res.status(500).json({ message: "Error sending email!" });
     }
-    console.log("Email sent: " + info.response);
+    // console.log("Email sent: " + info.response);
     res.status(200).json({ message: "Password reset email sent successfully" });
   });
 });
@@ -206,13 +206,13 @@ const sendEmail = asyncHandler(async (req, res) => {
   const mailOptions = {
     from: process.env.EMAIL_USER, // Your email address
     to: email, // Sender's email address (the one provided in the form)
-    subject: `UBP Made Easy – Thank You for Your Feedback!`, // Subject of the email
+    subject: `UBP Made Easy – Thank You for Your Feedback`, // Subject of the email
     html: `
       <p>Dear ${name},</p>
-      <p>Thank you for contacting UBP Made Easy! We appreciate you reaching out to us.</p>
+      <p>Thank you for contacting UBP Made Easy. We truly appreciate hearing from you.</p>
       <p>We have received your message and are currently reviewing it. We will be in touch shortly with a response.</p>
-      <p>In the meantime, please don't hesitate to reach out if you have any further questions.</p>
-      <p><strong>Your message:</strong> ${message}</p>
+      <p>In the meantime, feel free to reach out if you have any additional questions or need further assistance</p>
+      <p><strong>Here is your message:</strong> ${message}</p>
       <p>Sincerely,<br />UBP Made Easy Team</p>
     `, // HTML content of the email
   };
@@ -222,7 +222,7 @@ const sendEmail = asyncHandler(async (req, res) => {
     if (error) {
       return res.status(500).json({ message: "Error sending email!" });
     }
-    console.log("Email sent: " + info.response);
+    // console.log("Email sent: " + info.response);
     res.status(200).json({ message: "Message sent successfully!" });
   });
 });

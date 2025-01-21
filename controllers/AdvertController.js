@@ -60,13 +60,13 @@ const createAdvert = asyncHandler(async (req, res) => {
   const regex = new RegExp(`^${advertType}$`, "i");
   const advertAvailable = await Advert.findOne({ advertType: regex });
   if (advertAvailable) {
-    console.log("Advert Type Already Exists:", advertType);
+    // console.log("Advert Type Already Exists:", advertType);
     return res.status(400).json({ error: "Advert type already exists!" });
   }
 
   try {
     // Create Advert Type
-    console.log("Creating Advert:", req.body);
+    // console.log("Creating Advert:", req.body);
     await Advert.create(req.body);
     res.status(201).json({ message: "Advert type added successfully" });
   } catch (error) {
