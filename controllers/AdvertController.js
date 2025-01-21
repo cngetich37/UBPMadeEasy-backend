@@ -20,7 +20,7 @@ const createAdvert = asyncHandler(async (req, res) => {
     licenseFee,
   } = req.body;
 
-  console.log("Request Body:", req.body);
+  // console.log("Request Body:", req.body);
 
   // Check if required fields are provided
   if (
@@ -36,19 +36,19 @@ const createAdvert = asyncHandler(async (req, res) => {
     !perEachperYear ||
     !licenseFee
   ) {
-    console.log("Validation Failed:", {
-      advertType,
-      advertisementCategory,
-      subCategoryOne,
-      subCategoryTwo,
-      applicationFee,
-      firstThreeMetres,
-      firstSquareMetres,
-      firstTenSquareMetres,
-      extraSquareMetres,
-      perEachperYear,
-      licenseFee,
-    });
+    // console.log("Validation Failed:", {
+    //   advertType,
+    //   advertisementCategory,
+    //   subCategoryOne,
+    //   subCategoryTwo,
+    //   applicationFee,
+    //   firstThreeMetres,
+    //   firstSquareMetres,
+    //   firstTenSquareMetres,
+    //   extraSquareMetres,
+    //   perEachperYear,
+    //   licenseFee,
+    // });
 
     res.status(400);
     throw new Error(
