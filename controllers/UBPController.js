@@ -570,7 +570,7 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
       businessSubCategoryCode: regex,
     });
 
-    console.log("Business SubCategory found:", ubpBusinessSubCategory);
+    // console.log("Business SubCategory found:", ubpBusinessSubCategory);
 
     if (!ubpBusinessSubCategory) {
       res.status(404).json({ error: "Business SubCategory not found!" });
@@ -780,7 +780,7 @@ const getUBPBusinessActivityCode = asyncHandler(async (req, res) => {
       businessActivityCode: regex,
     }).exec();
 
-    console.log("Business Activity found:", ubpBusinessActivity);
+    // console.log("Business Activity found:", ubpBusinessActivity);
 
     if (!ubpBusinessActivity) {
       res.status(404).json({ error: "Business Activity not found!" });
