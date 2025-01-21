@@ -552,7 +552,7 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
   try {
     const { businessSubCategoryCode } = req.params;
 
-    console.log("Business SubCategory Code:", businessSubCategoryCode);
+    // console.log("Business SubCategory Code:", businessSubCategoryCode);
 
     let regex;
     if (businessSubCategoryCode.includes("-")) {
@@ -564,7 +564,7 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
       );
     }
 
-    console.log("Regex:", regex);
+    // console.log("Regex:", regex);
 
     const ubpBusinessSubCategory = await BusinessSubCategory.findOne({
       businessSubCategoryCode: regex,
@@ -588,7 +588,7 @@ const getUBPBusinessSubCategoryCode = asyncHandler(async (req, res) => {
 // @access public
 const uploadBusinessActivities = asyncHandler(async (req, res) => {
   try {
-    console.log("Request body:", req.body); // Log the entire request body
+    // console.log("Request body:", req.body); // Log the entire request body
 
     // Extract businessActivities array from request body
     const { businessActivities } = req.body;
@@ -762,7 +762,7 @@ const getUBPBusinessActivityCode = asyncHandler(async (req, res) => {
   try {
     const { businessActivityCode } = req.params;
 
-    console.log("Business Activity Code:", businessActivityCode);
+    // console.log("Business Activity Code:", businessActivityCode);
 
     let regex;
     if (businessActivityCode.includes("-")) {
@@ -774,7 +774,7 @@ const getUBPBusinessActivityCode = asyncHandler(async (req, res) => {
       );
     }
 
-    console.log("Regex:", regex);
+    // console.log("Regex:", regex);
 
     const ubpBusinessActivity = await BusinessActivity.findOne({
       businessActivityCode: regex,
@@ -789,7 +789,7 @@ const getUBPBusinessActivityCode = asyncHandler(async (req, res) => {
 
     const financeActs = await FinanceAct.find({ naicsCode: ubpBusinessActivity.businessTradeCode });
 
-    console.log("Finance Acts found:", financeActs);
+    // console.log("Finance Acts found:", financeActs);
 
     if (!financeActs) {
       res.status(404).json({ error: "Finance Acts not found!" });
@@ -813,7 +813,7 @@ const getNaicsCodeFinanceAct = asyncHandler(async (req, res) => {
   try {
     const { naicsCode } = req.params;
 
-    console.log("Naics Code:", naicsCode);
+    // console.log("Naics Code:", naicsCode);
 
     let regex;
     if (naicsCode.includes("-")) {
@@ -825,13 +825,13 @@ const getNaicsCodeFinanceAct = asyncHandler(async (req, res) => {
       );
     }
 
-    console.log("Regex:", regex);
+    // console.log("Regex:", regex);
 
     const ubpFinanceAct = await FinanceAct.find({
       naicsCode: regex,
     });
 
-    console.log("Finance Act found:", ubpFinanceAct);
+    // console.log("Finance Act found:", ubpFinanceAct);
 
     if (!ubpFinanceAct) {
       res.status(404).json({ error: "Finance Act naics code not found!" });
