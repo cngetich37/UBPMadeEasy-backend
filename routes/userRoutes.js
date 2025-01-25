@@ -5,7 +5,8 @@ const {
   currentUser,
   forgotPassword,
   resetPassword,
-  sendEmail
+  sendEmail,
+  sendEmailCnetech
 } = require("../controllers/UserController");
 const validToken = require("../middleware/validateTokenHandler");
 const router = express.Router();
@@ -14,6 +15,7 @@ router.post("/signup", registerUser);
 
 router.post("/login", loginUser);
 router.post("/send-email",sendEmail);
+router.post("/contact",sendEmailCnetech);
 
 router.get("/current", validToken, currentUser);
 
