@@ -15,7 +15,7 @@ router.post("/signup", registerUser);
 
 router.post("/login", loginUser);
 router.post("/send-email",sendEmail);
-router.post("/contact",sendEmailCnetech);
+router.post("/contact-us",sendEmailCnetech);
 
 router.get("/current", validToken, currentUser);
 
