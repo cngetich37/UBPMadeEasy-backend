@@ -268,32 +268,30 @@ const sendEmailCnetech = asyncHandler(async (req, res) => {
       <table style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5; color: #333;">
       <tr>
       <td>
-        <strong style="color:#000D2F">CNETECH AFRICA</strong><br>
-        <em style="color:#000D2F">Think & Create it</em><br><br>
-        📍 <strong style="color:#000D2F">Non-profit Organization dedicated to bridging the digital divide.</strong><br>
-        📧 <strong style="color:#000D2F">Email:</strong> <a href="mailto:contact@cnetechafrica.org" style="color: #0078D4; text-decoration: none;">contact@cnetechafrica.org</a><br>
-        📱 <strong style="color:#000D2F">Phone:</strong> +254 703432805<br>
-        🌐 <strong style="color:#000D2F">Website:</strong> <a href="https://www.cnetechafrica.org" style="color: #0078D4; text-decoration: none;">www.cnetechafrica.org</a><br>
-        🔗 <strong style="color:#000D2F">LinkedIn:</strong> <a href="https://www.linkedin.com/company/cnetech-africa/" style="color: #0078D4; text-decoration: none;">linkedin.com/in/cnetechafrica</a><br><br>
+      <strong style="color:#000D2F">CNETECH AFRICA</strong><br>
+      <em style="color:#000D2F">Think & Create it</em><br><br>
+      📍 <strong style="color:#000D2F">Non-profit Organization dedicated to bridging the digital divide.</strong><br>
+      📧 <strong style="color:#000D2F">Email:</strong> <a href="mailto:contact@cnetechafrica.org" style="color: #0078D4; text-decoration: none;">contact@cnetechafrica.org</a><br>
+      📱 <strong style="color:#000D2F">Phone:</strong> +254 703432805<br>
+      🌐 <strong style="color:#000D2F">Website:</strong> <a href="https://www.cnetechafrica.org" style="color: #0078D4; text-decoration: none;">www.cnetechafrica.org</a><br>
+      🔗 <strong style="color:#000D2F">LinkedIn:</strong> <a href="https://www.linkedin.com/company/cnetech-africa/" style="color: #0078D4; text-decoration: none;">linkedin.com/in/cnetechafrica</a><br><br>
       </td>
       </tr>
       <tr>
       <td>
-        <img src="https://www.cnetechafrica.org/cnetechafricalogo.jpeg" alt="CNETECH AFRICA Logo" style="width: 150px; margin-top: 10px;">
+      <img src="https://www.cnetechafrica.org/cnetechafricalogo.jpeg" alt="CNETECH AFRICA Logo" style="width: 150px; margin-top: 10px;">
       </td>
       </tr>
       <tr>
       <td>
-        <em style="color:#000D2F">"Empowering innovation, driving Africa’s digital future."</em><br><br>
+      <em style="color:#000D2F">"Empowering innovation, driving Africa’s digital future."</em><br><br>
       <strong style="color:#000D2F">Follow us:</strong><br>
       🌍 <a href="http://facebook.com/cnetechafrica" style="color: #0078D4; text-decoration: none;">Facebook</a> |
       🐦 <a href="http://twitter.com/cnetechafrica" style="color: #0078D4; text-decoration: none;">Twitter</a> |
       📸 <a href="http://instagram.com/cnetech_africa" style="color: #0078D4; text-decoration: none;">Instagram</a>
-    </td>
-  </tr>
-</table>
-
-    `, // HTML content of the email
+      </td>
+      </tr>
+      </table>`, // HTML content of the email
   };
 
   // Send the email using Nodemailer
