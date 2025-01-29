@@ -34,6 +34,9 @@ const getHome = (req, res) => {
       </body>
       </html>
     `;
+    res.setHeader('Vercel-CDN-Cache-Control', 'max-age=3600');
+    res.setHeader('CDN-Cache-Control', 'max-age=60');
+    res.setHeader('Cache-Control', 'max-age=10');
   
     res.status(200).send(htmlResponse);
   };
