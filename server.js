@@ -10,6 +10,7 @@ connectDb();
 
 app.use(cors());
 app.use(express.json());
+app.use("/", require("./routes/HomeRoutes"));
 app.use("/api/naics", require("./routes/UBPRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/advert", require("./routes/AdvertRoutes"));

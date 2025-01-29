@@ -76,7 +76,7 @@ const createAdvert = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc Get a UBP Activity by Common Business Activity
+// @desc Get a UBP Activity by Common Advert Type
 // @route GET /api/advert/:advertType
 // @access public
 const getAdvertType = asyncHandler(async (req, res) => {
