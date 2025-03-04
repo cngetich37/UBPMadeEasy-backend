@@ -209,33 +209,44 @@ const resetPassword = asyncHandler(async (req, res) => {
 
 // Contact form submission handler
 const sendEmail = asyncHandler(async (req, res) => {
-  const { message } = req.body;
+  const { name, email, message } = req.body;
 
   // Validate the request body
-  if (!message) {
-    res.status(400);
-    throw new Error("feedback is mandatory!");
+  if (!name || !email || !message) {
+    return res.status(400).json({ message: "All fields (Name, Email, and Message) are required." });
   }
 
-  // Set up mail options for sending the contact form email
-  const mailOptions = {
-    from: process.env.EMAIL_USER, // Your email address
-    to: process.env.EMAIL_USER, // Sender's email address (the one provided in the form)
-    subject: `UBPJiji - Delivered Feedback`, // Subject of the email
-    html: `
-      <p><strong>Delivered Feedback:</strong> ${message}</p>
-    `, 
-  };
+  try {
+    // Set up mail options for sending the contact form email
+    const mailOptions = {
+      from: process.env.EMAIL_USER, // Your email address
+      to: email, // Sender's email address (the one provided in the form)
+      subject: `UBPJiji - Feedback Received`,
+      html: `
+        <p>Hello <strong>${name}</strong>,</p>
+        <p>Thank you for reaching out! We have received your message:</p>
+        <blockquote style="border-left: 4px solid #065A38; padding-left: 10px; color: #333;">
+          ${message}
+        </blockquote>
+        <p>We will get back to you as soon as possible.</p>
+        <p>Best regards,<br/>The UBPJiji Team</p>
+      `,
+    };
 
-  // Send the email using Nodemailer
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      return res.status(500).json({ message: "Error sending email!" });
-    }
-    // console.log("Email sent: " + info.response);
-    res.status(200).json({ message: "Message sent successfully!" });
-  });
+    // Send the email using Nodemailer
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Email sending error:", error);
+        return res.status(500).json({ message: "There was an issue sending your message. Please try again later." });
+      }
+      res.status(200).json({ message: "Your message has been sent successfully. Please check your email for confirmation." });
+    });
+  } catch (error) {
+    console.error("Server error:", error);
+    res.status(500).json({ message: "Something went wrong. Please try again later." });
+  }
 });
+
 
 // Contact form submission handler
 const sendEmailCnetech = asyncHandler(async (req, res) => {
