@@ -156,7 +156,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
-    subject: "UBP Made Easy Password Reset",
+    subject: "UBPJiji - Password Reset",
     html: `Click the following link to reset your password: <a href="${resetPasswordLink}">${resetPasswordLink}</a>`,
   };
 
@@ -223,9 +223,9 @@ const sendEmail = asyncHandler(async (req, res) => {
       to: email, // Sender's email address (the one provided in the form)
       subject: `UBPJiji - Feedback Received`,
       html: `
-        <p>Hello <strong>${name}</strong>,</p>
+        <p>Hi <strong>${name}</strong>,</p>
         <p>Thank you for reaching out! We have received your message:</p>
-        <blockquote style="border-left: 4px solid #065A38; padding-left: 10px; color: #333;">
+        <blockquote style="border-left: 2px solid #065A38; padding-left: 4px; color: #333;">
           ${message}
         </blockquote>
         <p>We will get back to you as soon as possible.</p>
